@@ -1,0 +1,57 @@
+# n2Shader site
+
+The public one-screen landing page that introduces the company n2Shader and tells visitors how to reach it.
+
+## Page
+
+**Landing page**:
+The single screen of the site, in one locale. There are no other pages.
+_Avoid_: Home, homepage, index
+
+**Content layer**:
+Everything on the landing page that carries meaning: company name, logo, slogan, contact details and the locale switch.
+_Avoid_: Foreground, UI, overlay
+
+**Background scene**:
+The decorative animated 3D artwork behind the content layer. It carries no information.
+_Avoid_: Canvas, hero, background animation
+
+**Fallback backdrop**:
+The static image or gradient shown behind the content layer before the background scene appears, or instead of it when it can't run.
+_Avoid_: Placeholder, poster, loading screen
+
+**Still frame**:
+The background scene held motionless, shown to visitors who ask their device for reduced motion.
+_Avoid_: Paused scene, static mode
+
+## Company
+
+**Company name**:
+"n2Shader", written with that exact capitalisation.
+_Avoid_: N2Shader, n2shader, N2S
+
+**Slogan**:
+The short line under the company name saying what n2Shader does.
+_Avoid_: Tagline, description, subtitle
+
+**Contact details**:
+The three ways to reach n2Shader shown on the page: one email address, one phone number and one postal address.
+_Avoid_: Contacts, contact info, contact section
+
+**Office address**:
+The postal address of n2Shader. Clients don't visit it.
+_Avoid_: Location, store, headquarters
+
+**Public profiles**:
+n2Shader's accounts on other sites (LinkedIn, GitHub, etc.). They aren't shown on the page.
+_Avoid_: Socials, social links
+
+## Locales
+
+**Locale**:
+One language version of the landing page: English (the default) or Spanish.
+_Avoid_: Language version, translation, i18n
+
+**Locale switch**:
+The small link that moves a visitor between the English and Spanish landing pages.
+_Avoid_: Language picker, language selector, toggle

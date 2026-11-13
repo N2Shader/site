@@ -1,0 +1,31 @@
+/* Mobile-native baseline: no design decisions here, only platform fixes. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  /* Stops pull-to-refresh and scroll chaining on the one-screen page. */
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100svh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Removes the double-tap zoom delay on interactive elements. Put hover styles inside @media (hover: hover). */
+a,
+button {
+  touch-action: manipulation;
+}
