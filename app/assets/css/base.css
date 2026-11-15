@@ -1,4 +1,9 @@
-/* Mobile-native baseline: no design decisions here, only platform fixes. */
+/* Mobile-native baseline: platform fixes, plus the paper colour the fallback backdrop needs. */
+:root {
+  /* Must match SceneSettings.paperColor in app/scene/SceneSettings.ts. */
+  --paper: #f4f2ee;
+}
+
 *,
 *::before,
 *::after {
@@ -9,6 +14,10 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  /* Fallback backdrop colour from the very first paint, also behind any overscroll. */
+  background-color: var(--paper);
+  /* The brush follows touch drags (ADR-0008): keep pinch zoom, drop panning. */
+  touch-action: pinch-zoom;
 }
 
 html,

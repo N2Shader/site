@@ -15,3 +15,19 @@
 3. (grilling answers via input tool) static + client-only scene; Netlify; EN + ES (EN at /, ES at /es, @nuxtjs/i18n, small corner switch); Organization schema; 1 email + 1 phone linked, address plain; sameAs JSON-LD only; no analytics; domain https://n2shader.com; placeholders for copy; meta/OG/hreflang + JSON-LD + sitemap/robots + llms.txt; WCAG 2.2 AAA where feasible; reduced motion still frame, no pause button; CSS gradient fallback; favicon SVG as logo; never scroll, shrink to fit; @nuxt/fonts self-hosted; done = Lighthouse 100x4 + axe 0 + Rich Results/hreflang valid; design direction parked for the scene prompt.
 4. (stack answers) à la carte SEO modules; static OG PNG per locale; nuxt-llms module; plain scoped CSS + tokens.
 5. (scaffold answers) install all v1 libraries; full verify tooling (lint/typecheck/test); apply mobile baseline now; no pre-commit hook.
+
+## Black-ink painting scene (watercolor.bizar.ro reverse-engineer) — planning — 2026-11-14 23:04
+
+1. I would like that for the scene, we reverse engineer this website: https://watercolor.bizar.ro/ But before doing that, before any code let's make some changes to it, let's planning so go to that website, focus only on the scene. forget about the native apps, the texts, the controls. inspect the code. we will use a very similar patter to it. can you find some similar apps to that list them in your response. apply grilling skills before any code be mande. we will start by creating the experience on this repo, on this site. The painting will occurr automatically when the user move its mouse or touch the canvas. no colours just a black ink will be painting. no options or controls.
+2. (grilling answers via input tool) Renderer: three.js WebGPURenderer + TSL; clean reimplementation, no copied shader text; mouse hover and touch drag paint, only while moving, brush runs dry; dried ink fades slowly (~30 s); TSL render-target passes (run on WebGPU and the WebGL2 fallback); textured neutral off-white paper; text inverts over ink with mix-blend-mode: difference; reduced motion = still paper, no ink.
+3. (grilling answers) mid-grey contrast dip accepted and recorded in an ADR; one intro stroke on load; build the scene on the bare page now (ticket 07 unblocked); resize clears to clean paper.
+4. (grilling answers) intro stroke = random gesture; touch: first finger only, pinch zoom kept, window listeners, taps leave a dot; loop sleeps when idle or the tab is hidden; lazy-load + 2 quality tiers + DPR cap.
+5. (grilling answers) random gesture 1.2–2 s, 40–70% of the short side, interruptible; write ADRs, glossary and tickets; keep vignette and wet sheen, grain doesn't move; plan confirmed.
+
+## Build ticket 07: background scene shell — 2026-11-15 13:28
+
+1. /build-ticket 07
+2. (input answers) paper #f4f2ee; DPR cap 2; test seams: BackgroundScene component, SceneController lifecycle, viewport sizing
+3. unmm I can't see anything different on screen is that right?
+4. /verify
+5. close the ticket

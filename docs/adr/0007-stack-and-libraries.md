@@ -10,5 +10,5 @@ Nuxt 4 + TypeScript + pnpm (the owner's usual stack). Libraries are limited to w
 | llms.txt | `nuxt-llms` | Chosen over a static file at the owner's request. It's pre-1.0, so watch for breaking changes |
 | Share image | Static 1200×630 PNG per locale in `public/` | Designed once the background scene exists. We rejected `nuxt-og-image` as too heavy for one page |
 | Styling | Plain scoped CSS + one tokens file | One screen doesn't justify a CSS framework |
-| Background scene | `three` + `gsap`, no TresJS | TresJS was tried and removed. A single decorative scene is mounted imperatively in the browser (ADR-0001) |
+| Background scene | `three` (`three/webgpu` `WebGPURenderer` + TSL) + `gsap`, no TresJS | TresJS was tried and removed. A single decorative scene is mounted imperatively in the browser (ADR-0001). TSL render-target passes run on WebGPU and on its WebGL2 fallback; GSAP drives the intro stroke (ADR-0008) |
 | Analytics | None | ADR-0006 |

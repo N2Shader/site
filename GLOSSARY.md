@@ -13,7 +13,7 @@ Everything on the landing page that carries meaning: company name, logo, slogan,
 _Avoid_: Foreground, UI, overlay
 
 **Background scene**:
-The decorative animated 3D artwork behind the content layer. It carries no information.
+The decorative ink painting behind the content layer, which visitors paint by moving the pointer. It carries no information.
 _Avoid_: Canvas, hero, background animation
 
 **Fallback backdrop**:
@@ -21,8 +21,26 @@ The static image or gradient shown behind the content layer before the backgroun
 _Avoid_: Placeholder, poster, loading screen
 
 **Still frame**:
-The background scene held motionless, shown to visitors who ask their device for reduced motion.
+The background scene as clean paper with no ink, shown to visitors who ask their device for reduced motion.
 _Avoid_: Paused scene, static mode
+
+## Background scene
+
+**Paper**:
+The textured off-white sheet that fills the background scene and takes the ink.
+_Avoid_: Canvas, sheet, surface
+
+**Ink**:
+The only colour in the background scene: black, or grey where it's thin. It runs wet, soaks into the paper, dries and fades away.
+_Avoid_: Paint, pigment, colour
+
+**Brush**:
+The invisible tool that follows the visitor's pointer and lays ink while it moves. It runs dry on long strokes.
+_Avoid_: Cursor, pen, stroke tool
+
+**Intro stroke**:
+The single random brush stroke that paints itself once when the page loads, to show that the paper can be painted.
+_Avoid_: Intro animation, demo stroke, hint
 
 ## Company
 
