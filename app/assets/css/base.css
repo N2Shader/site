@@ -1,9 +1,4 @@
-/* Mobile-native baseline: platform fixes, plus the paper colour the fallback backdrop needs. */
-:root {
-  /* Must match SceneSettings.paperColor in app/scene/SceneSettings.ts. */
-  --paper: #f4f2ee;
-}
-
+/* Mobile-native baseline, the one-screen lock, and the shared text, link and focus styles. */
 *,
 *::before,
 *::after {
@@ -16,6 +11,8 @@ html {
   -webkit-tap-highlight-color: transparent;
   /* Fallback backdrop colour from the very first paint, also behind any overscroll. */
   background-color: var(--paper);
+  color: var(--text-colour);
+  font-family: var(--font-body);
   /* The brush follows touch drags (ADR-0008): keep pinch zoom, drop panning. */
   touch-action: pinch-zoom;
 }
@@ -23,12 +20,14 @@ html {
 html,
 body {
   margin: 0;
+  /* One screen that never scrolls (ADR-0004); content that doesn't fit is clipped, an accepted risk. */
+  overflow: hidden;
   /* Stops pull-to-refresh and scroll chaining on the one-screen page. */
   overscroll-behavior: none;
 }
 
 body {
-  min-height: 100svh;
+  height: 100svh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   -webkit-font-smoothing: antialiased;
 }
@@ -37,4 +36,40 @@ body {
 a,
 button {
   touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* Hover only where a real pointer can hover, so a tap doesn't leave a sticky state. */
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/*
+ * The content layer inverts over the ink (ADR-0009): dark on paper, light on ink. Only while the scene is running;
+ * pending, still frame (reduced motion), failed and forced colours keep plain dark text. Give `.content-layer` to each
+ * top-level content block (the main stack, the locale switch), never to a wrapper of the background scene. The scene
+ * must stay in the root stacking context, so the blend has the ink to blend with.
+ */
+@media not (forced-colors: active) {
+  /* The state values come from BackgroundSceneState (app/composables/useBackgroundScene.ts). */
+  html[data-background-scene='running'] .content-layer {
+    color: var(--text-colour-blended);
+    mix-blend-mode: difference;
+  }
+}
+
+/*
+ * Visible focus (WCAG 2.4.7, 2.4.13): a solid ring in the text colour, clear of the text. Over the running scene the
+ * ring is drawn inside the blended content layer, so it inverts with the text and shows on paper and on ink.
+ */
+:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
 }

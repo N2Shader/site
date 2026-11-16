@@ -1,0 +1,16 @@
+{
+  "landingPage": {
+    "logoLabel": "n2Shader logo",
+    "slogan": "PLACEHOLDER: what n2Shader does, in one line."
+  },
+  "contactDetails": {
+    "email": "hello{'@'}n2shader.com",
+    "phoneE164": "+34600000000",
+    "phoneDisplay": "+34 600 000 000",
+    "officeAddress": {
+      "street": "PLACEHOLDER Street 1",
+      "locality": "28001 Madrid",
+      "country": "Spain"
+    }
+  }
+}

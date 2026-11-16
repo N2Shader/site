@@ -16,12 +16,16 @@ Nuxt 4 (prerendered with `nuxt generate`, deployed to Netlify), TypeScript, pnpm
 
 ## Folder map
 
-- `app/app.vue`: root component
-- `app/assets/css/base.css`: mobile-native baseline plus the `--paper` colour
-- `app/components/BackgroundScene.vue`: fallback backdrop + scene canvas; `app/composables/useBackgroundScene.ts` mounts it
-- `app/scene/`: framework-free scene code; `SceneController` (lifecycle, motion setting, resize), `ThreeSceneAdapter` (the only three.js file), `SceneSettings` (tuning constants)
-- `test/`: Vitest specs (`test/scene` plain, `test/components` in the Nuxt environment)
-- `public/`: favicon, later share images
+- `app/app.vue`: root component; sets `<html lang>` from the locale
+- `app/pages/index.vue`: the landing page's content layer (enables i18n routing)
+- `app/components/CompanyLogo.vue`, `ContactDetailsList.vue`: logo and contact details; `app/composables/useContactDetails.ts` reads the contact details from the locale messages
+- `app/assets/css/tokens.css`: design tokens (`--paper`, text colour, font, the `clamp()` type scale and logo size that shrink to fit, spacing, focus ring, the blended text colour); `base.css`: mobile-native baseline, one-screen lock, link and focus styles, the content-layer difference blend (ADR-0009)
+- `app/components/BackgroundScene.vue`: fallback backdrop + scene canvas, publishes the scene state as `<html data-background-scene>`; `app/composables/useBackgroundScene.ts` mounts it
+- `app/scene/`: framework-free scene code; `SceneController` (lifecycle, motion setting, resize), `BrushStroke` (pointer moves to per-frame brush dabs, load), `SimulationGrid` (grid sizes), `IntroStrokePath` (the random noise path) and `IntroStrokePlayer` (GSAP moves the brush along it; the only GSAP code), `ThreeSceneAdapter` (wires the renderer, brush and simulation), `SceneSettings` (every tuning constant)
+- `app/scene/ink/`: the ink simulation's TSL passes (paper, water flow, carry/spread/settle, draw) and their render targets; with `ThreeSceneAdapter`, the only three.js code
+- `i18n/locales/`: `en.json`, `es.json`, the copy and contact details (email and phone repeat in both by choice; keep them in sync)
+- `test/`: Vitest specs (`test/scene` plain, `test/components` in the Nuxt environment, `test/e2e` builds the app and reads the server HTML, ~1 min)
+- `public/`: favicon, `fonts/` (the one Cascadia Mono variable WOFF2 the page uses), later share images
 - `nuxt.config.ts`: site URL, locales, SEO modules, llms.txt, prerender routes
 - `docs/adr/`: architecture decisions
 - `.scratch/<feature>/`: specs and tickets (local markdown tracker)

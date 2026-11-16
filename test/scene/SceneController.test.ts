@@ -1,60 +1,10 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createSceneController } from '../../app/scene/SceneController'
-import type { SceneAdapter, SceneState } from '../../app/scene/SceneController'
-
-const createFakeAdapter = (): SceneAdapter => ({
-  resize: vi.fn(),
-  renderStillFrame: vi.fn(),
-  startLoop: vi.fn(),
-  stopLoop: vi.fn(),
-  moveBrush: vi.fn(),
-  dispose: vi.fn(),
-})
-
-const createFakeMotionQuery = (reduce: boolean) => {
-  const listeners = new Set<() => void>()
-  const query = {
-    matches: reduce,
-    addEventListener: (_type: 'change', listener: () => void) => listeners.add(listener),
-    removeEventListener: (_type: 'change', listener: () => void) => listeners.delete(listener),
-  }
-  const setReducedMotion = (next: boolean) => {
-    query.matches = next
-    listeners.forEach(listener => listener())
-  }
-  return { query, setReducedMotion }
-}
-
-const moveMouseTo = (x: number, y: number) => {
-  window.dispatchEvent(new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1, pointerType: 'mouse' }))
-}
-
-const resizeWindow = () => {
-  window.dispatchEvent(new Event('resize'))
-}
-
-// Every controller is disposed after its test so its window listeners don't leak into the next one.
-const liveControllers: Array<{ dispose: () => void }> = []
-
-const setupController = ({ reduce = false, loadFails = false } = {}) => {
-  const adapter = createFakeAdapter()
-  const motion = createFakeMotionQuery(reduce)
-  const states: SceneState[] = []
-  const loadScene = vi.fn(() => (loadFails ? Promise.reject(new Error('no WebGL2')) : Promise.resolve(adapter)))
-  const controller = createSceneController({
-    target: window,
-    reducedMotionQuery: motion.query,
-    loadScene,
-    onStateChange: state => states.push(state),
-  })
-  liveControllers.push(controller)
-  return { adapter, motion, states, loadScene, controller }
-}
+import { disposeLiveControllers, moveMouseTo, resizeWindow, setupController } from './SceneControllerHarness'
 
 describe('SceneController', () => {
   afterEach(() => {
-    liveControllers.splice(0).forEach(controller => controller.dispose())
+    disposeLiveControllers()
     vi.useRealTimers()
   })
 

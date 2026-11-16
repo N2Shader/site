@@ -1,0 +1,41 @@
+/* Design tokens: colours, font, the type scale and spacing (ticket 06). */
+:root {
+  /* Must match SceneSettings.paperColor (app/scene/SceneSettings.ts) and theme-color (nuxt.config.ts). */
+  --paper: #f4f2ee;
+  /* 16.5:1 against --paper, so every text size clears AAA's 7:1 (spec, Accessibility). */
+  --text-colour: #141414;
+  /*
+   * Text colour while the content layer blends over the running background scene (ADR-0009).
+   * White under a difference blend shows as #0b0d11 on --paper (about 17:1) and as white on black ink.
+   */
+  --text-colour-blended: #fff;
+
+  /*
+   * Cascadia Mono (SIL OFL 1.1), one variable file covering weights 200–700: public/fonts/CascadiaMono-200-700.woff2.
+   * @nuxt/fonts finds it by name (it reads `--font-*` properties) and adds the @font-face and a metric-matched
+   * monospace fallback, so the swap doesn't shift the layout. The mono version has no coding ligatures in the copy.
+   * The owner keeps the full Cascadia 2111.01 set (Code/Mono, italics, Powerline, static weights; woff2/ttf/otf) at
+   * C:\Users\Jaime\Code\UTILS\CascadiaCode-2111.01. Copy in only the file a new style needs, never the whole set.
+   */
+  --font-body: 'Cascadia Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /*
+   * The page never scrolls, it shrinks to fit (ADR-0004). Sizes grow with the viewport width, except on
+   * screens wider than 1.6:1 (landscape phones), where the height runs out first and takes over.
+   * The minimums are low so the stack still fits a 568×320 landscape phone.
+   */
+  --fit-unit: min(1vw, 1.6svh);
+
+  --type-small: clamp(0.8125rem, 0.45rem + 0.6 * var(--fit-unit), 1.125rem);
+  --type-body: clamp(0.875rem, 0.5rem + 0.9 * var(--fit-unit), 1.5rem);
+  --type-display: clamp(1.75rem, 7 * var(--fit-unit), 6.5rem);
+
+  --logo-size: clamp(2rem, 9 * var(--fit-unit), 8rem);
+
+  /* Distance from the screen edges; the locale switch (ticket 02) sits top-right on the same inset. */
+  --space-edge: clamp(0.75rem, 3 * var(--fit-unit), 3.5rem);
+  --space-stack: clamp(0.375rem, 1.5 * var(--fit-unit), 1.75rem);
+
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 3px;
+}

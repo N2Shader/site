@@ -29,5 +29,5 @@ Lighthouse 100 ×4 on `/` and `/es` (mobile), axe zero violations plus a keyboar
 Contact form, analytics, cookie banner, CMS, extra pages, auth, backend, visible profile links.
 
 ## Open
-- Design direction for the content layer (fonts, layout) arrives in a later prompt. Colours follow the paper and the difference blend (ADR-0009).
+- Content-layer font: the owner supplies the files (ticket 06). Layout decided 2026-11-15: content stacked top-left, locale switch top-right. Colours follow the paper and the difference blend (ADR-0009).
 - Real copy, contact details and profile URLs in both languages.

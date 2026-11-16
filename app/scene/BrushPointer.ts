@@ -6,9 +6,14 @@ const toBrushPoint = (event: PointerEvent): BrushPoint => ({ x: event.clientX, y
  * Follows the first pointer on the window and reports where the brush moves.
  * Mouse and pen paint on hover; touch only fires moves while a finger is down, so it paints while dragging.
  * A second finger is ignored until the first one lifts. A hovering mouse hands the brush over to any pointer that
- * presses down, so touch still paints on laptops with a touchscreen. Returns a function that removes the listeners.
+ * presses down, so touch still paints on laptops with a touchscreen. `onBrushLift` fires when the pointer lets go of the
+ * brush or hands it over, so strokes don't join across lifts. Returns a function that removes the listeners.
  */
-export const listenForBrushPointer = (target: Window, onBrushMove: (point: BrushPoint) => void) => {
+export const listenForBrushPointer = (
+  target: Window,
+  onBrushMove: (point: BrushPoint) => void,
+  onBrushLift: () => void,
+) => {
   let activePointerId: number | null = null
   let isActivePointerPressed = false
 
@@ -22,10 +27,13 @@ export const listenForBrushPointer = (target: Window, onBrushMove: (point: Brush
     if (event.pointerId !== activePointerId) return
     activePointerId = null
     isActivePointerPressed = false
+    onBrushLift()
   }
 
   const onPointerDown = (event: PointerEvent) => {
-    if (!isActivePointerPressed) activePointerId = event.pointerId
+    if (isActivePointerPressed) return
+    if (activePointerId !== event.pointerId) onBrushLift()
+    activePointerId = event.pointerId
     isActivePointerPressed = true
   }
 

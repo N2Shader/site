@@ -11,13 +11,13 @@ export default defineNuxtConfig({
     'nuxt-schema-org',
     'nuxt-llms',
   ],
-  css: ['~/assets/css/base.css'],
+  css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
   app: {
     head: {
       // viewport-fit=cover lets the layout use the safe-area insets on notched phones.
       viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-      // TODO(design): replace with the background colour once the scene is designed.
-      meta: [{ name: 'theme-color', content: '#ffffff' }],
+      // The paper colour (--paper in tokens.css), so the browser chrome blends with the page.
+      meta: [{ name: 'theme-color', content: '#f4f2ee' }],
       link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     },
   },
@@ -32,9 +32,10 @@ export default defineNuxtConfig({
     defaultLocale: 'en',
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,
+    // Messages in i18n/locales/ hold the copy and the contact details, the one source for markup and JSON-LD (ADR-0003).
     locales: [
-      { code: 'en', language: 'en', name: 'English' },
-      { code: 'es', language: 'es', name: 'Español' },
+      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
+      { code: 'es', language: 'es', name: 'Español', file: 'es.json' },
     ],
   },
   // TODO(copy): placeholder text until the real slogan and description arrive (ADR-0006).

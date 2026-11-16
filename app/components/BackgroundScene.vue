@@ -4,6 +4,9 @@
 const canvas = ref<HTMLCanvasElement | null>(null)
 const sceneState = useBackgroundScene(canvas)
 const isSceneShown = computed(() => sceneState.value === 'running' || sceneState.value === 'still')
+// The content layer reads the state from <html> to blend only over the running background scene (ADR-0009, base.css).
+// The prerendered HTML ships `pending`, so text starts as plain dark text.
+useHead({ htmlAttrs: { 'data-background-scene': sceneState } })
 </script>
 
 <template>

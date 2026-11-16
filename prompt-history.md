@@ -31,3 +31,51 @@
 3. unmm I can't see anything different on screen is that right?
 4. /verify
 5. close the ticket
+
+## Build ticket 12: ink simulation — 2026-11-15 14:11
+
+1. /build-ticket 12
+2. (input answer) test seams: none
+3. looks good close this ticket, I'll later play with some parameteres
+
+## Build ticket 13: intro stroke — 2026-11-15 20:31
+
+1. /build-ticket 13
+2. (input answers) test seams: IntroStrokePath, SceneController; intro plays once, the first time the moving scene starts
+3. tess is a litle to straight can we modeify a little maybe maxBend
+4. perfect close the ticket
+
+## Build ticket 14: text inverts over ink (blocked) — 2026-11-15 21:00
+
+1. /build-ticket 14
+
+## Build ticket 01: landing page tracer bullet — 2026-11-15 21:05
+
+1. /build-ticket 1
+2. (input answers) test seams: landing page component, server HTML per route; obvious fake placeholder contact details
+3. (input answer) keep email and phone duplicated in both locale JSON files
+
+## Build ticket 06: one-screen layout and type — 2026-11-15 21:20
+
+1. /build-ticket 06
+2. (input answers) unblock: decide design direction now; font: I'll provide it myself, what works for you?; layout: top left; test seams: none, CSS only
+3. (input answers) build now with a system-font placeholder, swap later; locale switch top-right
+4. /verify
+5. (font folder: Cascadia Code 2111.01 woff2) This is the font, but do not add them all, just the one we're using it (or the most appropiated). If we add them all but not using them, is that bad for performance?
+6. This page will grow so add for the moment keep in memory probably in a comment, that if we need another spesific font I got them all. CLose this ticket
+
+## Build ticket 14: text inverts over ink — 2026-11-15 21:45
+
+1. /build-ticket 14
+2. (input answer) test seams: server HTML
+3. (input answers) focus ring over mid-grey ink: unblended focus ring (new ticket); add the content-layer note to ticket 02; keep 'N2Shader' (rename is a separate ticket)
+
+## Drop ticket 17 — 2026-11-15 22:00
+
+1. Ticket 17 is useless the only part of the app that should be rename was the title I did it, this ticket is not necessary delete it
+2. (interrupted the follow-up question about the two <h1> test assertions and the n2Shader doc rule)
+3. /verify
+
+## Tweakpane ticket — 2026-11-15 22:20
+
+1. Add a new ticket, add tweakpane to the experience, focus on the painting, use grilling to understand what is happening, this will take it later for now just add the ticket

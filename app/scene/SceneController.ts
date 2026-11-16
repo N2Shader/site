@@ -15,8 +15,16 @@ export type SceneAdapter = {
   startLoop: () => void
   stopLoop: () => void
   moveBrush: (point: BrushPoint) => void
+  /** Ends the current stroke, so the next move starts a new one. */
+  liftBrush: () => void
   dispose: () => void
 }
+
+/** The part of the scene the intro stroke paints with: the same brush input as the visitor's pointer. */
+export type IntroStrokeBrush = Pick<SceneAdapter, 'moveBrush' | 'liftBrush'>
+
+/** Starts the intro stroke on `brush` and returns a function that stops it early. */
+export type IntroStrokePlayer = (brush: IntroStrokeBrush, viewport: SceneViewport) => () => void
 
 export type MotionQuery = Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>
 
@@ -24,6 +32,7 @@ export type SceneControllerOptions = {
   target: Window
   reducedMotionQuery: MotionQuery
   loadScene: (viewport: SceneViewport) => Promise<SceneAdapter>
+  playIntroStroke: IntroStrokePlayer
   onStateChange: (state: SceneState) => void
 }
 
@@ -37,15 +46,50 @@ const readViewport = (target: Window) => measureSceneViewport({
  * Runs the background scene: loads it, picks the moving scene or the still frame from the
  * visitor's motion setting, and follows that setting while the page is open.
  */
-export const createSceneController = ({ target, reducedMotionQuery, loadScene, onStateChange }: SceneControllerOptions) => {
+export const createSceneController = ({
+  target,
+  reducedMotionQuery,
+  loadScene,
+  playIntroStroke,
+  onStateChange,
+}: SceneControllerOptions) => {
   let adapter: SceneAdapter | null = null
   let stopBrushPointer: (() => void) | null = null
+  let stopIntro: (() => void) | null = null
+  let hasPlayedIntro = false
   let resizeTimer: ReturnType<typeof setTimeout> | undefined
   let disposed = false
 
+  /** The intro stroke plays once per visit, the first time the moving scene runs. */
+  const playIntroOnce = (scene: SceneAdapter) => {
+    if (hasPlayedIntro) return
+    hasPlayedIntro = true
+    stopIntro = playIntroStroke(scene, readViewport(target))
+  }
+
+  /** Stops the intro stroke and lifts the brush, so whatever paints next starts a new line. */
+  const stopIntroEarly = (scene: SceneAdapter) => {
+    if (!stopIntro) return
+    stopIntro()
+    stopIntro = null
+    scene.liftBrush()
+  }
+
+  /** The visitor's pointer takes the brush over from the intro stroke straight away, on a move or a tap. */
+  const moveVisitorBrush = (scene: SceneAdapter) => (point: BrushPoint) => {
+    stopIntroEarly(scene)
+    scene.moveBrush(point)
+  }
+
+  const liftVisitorBrush = (scene: SceneAdapter) => () => {
+    stopIntroEarly(scene)
+    scene.liftBrush()
+  }
+
   const runMovingScene = (scene: SceneAdapter) => {
-    stopBrushPointer = listenForBrushPointer(target, scene.moveBrush)
+    stopBrushPointer = listenForBrushPointer(target, moveVisitorBrush(scene), liftVisitorBrush(scene))
     scene.startLoop()
+    playIntroOnce(scene)
     onStateChange('running')
   }
 
@@ -54,6 +98,7 @@ export const createSceneController = ({ target, reducedMotionQuery, loadScene, o
 
   const stopRunning = (scene: SceneAdapter) => {
     if (!stopBrushPointer) return
+    stopIntroEarly(scene)
     stopBrushPointer()
     stopBrushPointer = null
     scene.stopLoop()
@@ -73,6 +118,8 @@ export const createSceneController = ({ target, reducedMotionQuery, loadScene, o
 
   const rebuildAtViewportSize = () => {
     if (!adapter) return
+    // The resize clears the paper, and the intro's path was laid out for the old size.
+    stopIntroEarly(adapter)
     adapter.resize(readViewport(target))
     // A running loop redraws by itself; the still frame has to be drawn again.
     if (!isRunning()) adapter.renderStillFrame()
