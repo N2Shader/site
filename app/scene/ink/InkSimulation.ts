@@ -4,6 +4,7 @@ import type { QualityTier } from '../QualityTier'
 import { SceneSettings } from '../SceneSettings'
 import type { SceneViewport } from '../SceneViewport'
 import type { SimulationGrid } from '../SimulationGrid'
+import { measureBrushRadius } from '../SimulationGrid'
 import { createDrawNode } from './DrawPass'
 import { createAdvectVelocityNode, createCurlNode, createDivergenceNode, createPressureNode, createProjectNode } from './FlowPasses'
 import { createCarryNode, createSettleNode, createSpreadNode } from './InkPasses'
@@ -12,6 +13,7 @@ import type { FullScreenPass, PingPongTarget } from './InkTargets'
 import { createInkUniforms } from './InkUniforms'
 import type { InkUniforms } from './InkUniforms'
 import { createPaperNode } from './PaperPass'
+import { syncSettingsUniforms } from './SettingsUniforms'
 
 /** Every grid for one sheet of paper. A new sheet (on resize) gets new grids at the new size. */
 const createSheetTargets = (grid: SimulationGrid) => ({
@@ -85,11 +87,13 @@ export const createInkSimulation = (
   renderer: WebGPURenderer,
   viewport: SceneViewport,
   grid: SimulationGrid,
-  { pressureIterations, spreadIterations }: QualityTier,
+  qualityTier: QualityTier,
 ) => {
   const uniforms = createInkUniforms()
   const passes = createSimulationPasses(uniforms)
   let targets = createSheetTargets(grid)
+  let sheetViewport = viewport
+  let sheetTier = qualityTier
 
   const renderPass = (pass: FullScreenPass, target: RenderTarget | null) => {
     bindReadTargets(uniforms, targets)
@@ -118,24 +122,32 @@ export const createInkSimulation = (
   }
 
   /** Makes the paper for the current grids and clears them of ink. */
-  const prepareSheet = (sheetViewport: SceneViewport, sheetGrid: SimulationGrid) => {
-    setSheetSize(uniforms, sheetViewport, sheetGrid)
+  const prepareSheet = (nextViewport: SceneViewport, nextGrid: SimulationGrid) => {
+    sheetViewport = nextViewport
+    setSheetSize(uniforms, nextViewport, nextGrid)
     clearInk()
     renderPass(passes.paper, targets.paper)
   }
 
-  /** A fresh sheet: new paper at the grid's size, with no ink on it. */
-  const startSheet = (nextViewport: SceneViewport, nextGrid: SimulationGrid) => {
+  /** A fresh sheet: new paper at the grid's size, with no ink on it, run at `nextTier`'s iterations. */
+  const startSheet = (nextViewport: SceneViewport, nextGrid: SimulationGrid, nextTier: QualityTier) => {
     disposeSheetTargets(targets)
     targets = createSheetTargets(nextGrid)
+    sheetTier = nextTier
     prepareSheet(nextViewport, nextGrid)
+  }
+
+  /** Picks up retuned `SceneSettings` (the dev tuning panel) in the running shaders, keeping the ink on the sheet. */
+  const applyTunedSettings = () => {
+    syncSettingsUniforms(uniforms.settings)
+    uniforms.brushRadius.value = measureBrushRadius(sheetViewport)
   }
 
   const flowWater = () => {
     renderPass(passes.curl, targets.curl)
     renderPingPong(passes.advectVelocity, targets.velocity)
     renderPass(passes.divergence, targets.divergence)
-    renderPingPong(passes.pressure, targets.pressure, pressureIterations)
+    renderPingPong(passes.pressure, targets.pressure, sheetTier.pressureIterations)
     renderPingPong(passes.project, targets.velocity)
   }
 
@@ -144,7 +156,7 @@ export const createInkSimulation = (
     setFrame(uniforms, frameSeconds, dab)
     flowWater()
     renderPingPong(passes.carry, targets.state)
-    renderPingPong(passes.spread, targets.state, spreadIterations)
+    renderPingPong(passes.spread, targets.state, sheetTier.spreadIterations)
     renderPingPong(passes.settle, targets.state)
   }
 
@@ -153,6 +165,7 @@ export const createInkSimulation = (
   return {
     startSheet,
     clearInk,
+    applyTunedSettings,
     step,
     /** Draws the paper and its ink onto the canvas. */
     draw: () => renderPass(passes.draw, null),

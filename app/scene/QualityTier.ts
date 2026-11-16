@@ -34,6 +34,14 @@ const readDeviceCapabilities = (target: Window): DeviceCapabilities => {
   }
 }
 
+/** The name of the quality tier this device gets. */
+export const readQualityTierName = (target: Window): QualityTierName => pickQualityTierName(readDeviceCapabilities(target))
+
 /** The quality tier for this device, read once when the scene loads. */
-export const readQualityTier = (target: Window): QualityTier =>
-  SceneSettings.quality[pickQualityTierName(readDeviceCapabilities(target))]
+export const readQualityTier = (target: Window): QualityTier => SceneSettings.quality[readQualityTierName(target)]
+
+/** A tier forced from the dev tuning panel, or `auto` for the one the device gets. */
+export type QualityTierChoice = QualityTierName | 'auto'
+
+export const readQualityTierForChoice = (target: Window, choice: QualityTierChoice): QualityTier =>
+  choice === 'auto' ? readQualityTier(target) : SceneSettings.quality[choice]

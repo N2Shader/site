@@ -20,11 +20,16 @@ const scaleGrid = (width: number, height: number, scale: number): GridSize => ({
   height: Math.max(1, Math.round(height * scale)),
 })
 
+/** Brush radius in CSS pixels for a viewport, from the live `SceneSettings.brush.radiusOfShortSide`. */
+export const measureBrushRadius = ({ width, height }: Pick<SceneViewport, 'width' | 'height'>) =>
+  Math.min(width, height) * SceneSettings.brush.radiusOfShortSide
+
 /** Sizes of the simulation's grids for a viewport. The low quality tier gets a coarser paint grid. */
 export const measureSimulationGrid = (
-  { width, height, pixelRatio }: SceneViewport,
+  viewport: SceneViewport,
   { paintCellsPerPixel, maxPaintCells }: QualityTier,
 ): SimulationGrid => {
+  const { width, height, pixelRatio } = viewport
   const { flowScale } = SceneSettings.grid
   const paintScale = Math.min(paintCellsPerPixel, maxPaintCells / Math.max(width, height, 1))
   const paint = scaleGrid(width, height, paintScale)
@@ -32,6 +37,6 @@ export const measureSimulationGrid = (
     paint,
     flow: scaleGrid(paint.width, paint.height, flowScale),
     paper: scaleGrid(width, height, pixelRatio),
-    brushRadius: Math.min(width, height) * SceneSettings.brush.radiusOfShortSide,
+    brushRadius: measureBrushRadius(viewport),
   }
 }

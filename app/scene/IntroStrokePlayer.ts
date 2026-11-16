@@ -1,6 +1,6 @@
 import { gsap } from 'gsap'
 import { createIntroStrokePath, findPointAlongPath } from './IntroStrokePath'
-import type { IntroStrokePlayer } from './SceneController'
+import type { IntroStrokePlayer } from './SceneAdapter'
 import { SceneSettings } from './SceneSettings'
 
 /**

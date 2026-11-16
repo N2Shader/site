@@ -2,8 +2,9 @@ import { WebGPURenderer } from 'three/webgpu'
 import { createBrushStroke } from './BrushStroke'
 import { createCleanPaperClock } from './CleanPaperClock'
 import { createInkSimulation } from './ink/InkSimulation'
-import { readQualityTier } from './QualityTier'
-import type { SceneAdapter } from './SceneController'
+import { readQualityTier, readQualityTierForChoice } from './QualityTier'
+import type { QualityTierChoice } from './QualityTier'
+import type { SceneAdapter } from './SceneAdapter'
 import { SceneSettings } from './SceneSettings'
 import type { SceneViewport } from './SceneViewport'
 import { measureSimulationGrid } from './SimulationGrid'
@@ -54,7 +55,8 @@ const sizeCanvas = (renderer: WebGPURenderer, { width, height, pixelRatio }: Sce
 export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneViewport): Promise<SceneAdapter> => {
   const renderer = await createRenderer(canvas)
   sizeCanvas(renderer, viewport)
-  const qualityTier = readQualityTier(window)
+  let qualityTier = readQualityTier(window)
+  let sheetViewport = viewport
   const simulation = createInkSimulation(renderer, viewport, measureSimulationGrid(viewport, qualityTier), qualityTier)
   const brush = createBrushStroke(shortSideOf(viewport))
   const paperClock = createCleanPaperClock()
@@ -72,10 +74,22 @@ export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneV
   }
 
   const resize = (nextViewport: SceneViewport) => {
+    sheetViewport = nextViewport
     sizeCanvas(renderer, nextViewport)
-    simulation.startSheet(nextViewport, measureSimulationGrid(nextViewport, qualityTier))
+    simulation.startSheet(nextViewport, measureSimulationGrid(nextViewport, qualityTier), qualityTier)
     brush.resetForSheet(shortSideOf(nextViewport))
     paperClock.markPaperClean()
+  }
+
+  const clearInk = () => {
+    simulation.clearInk()
+    brush.lift()
+    paperClock.markPaperClean()
+  }
+
+  const useQualityTier = (choice: QualityTierChoice) => {
+    qualityTier = readQualityTierForChoice(window, choice)
+    resize(sheetViewport)
   }
 
   const startLoop = (onPaperClean: () => void) => {
@@ -100,6 +114,9 @@ export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneV
     },
     startLoop,
     stopLoop,
+    applyTunedSettings: simulation.applyTunedSettings,
+    clearInk,
+    useQualityTier,
     moveBrush: brush.moveTo,
     liftBrush: brush.lift,
     dispose: () => {

@@ -1,7 +1,8 @@
 import type { Ref } from 'vue'
 import { whenBrowserIdle } from '~/scene/BrowserIdle'
 import { createSceneController } from '~/scene/SceneController'
-import type { IntroStrokePlayer, SceneState } from '~/scene/SceneController'
+import type { IntroStrokePlayer, SceneTuning } from '~/scene/SceneAdapter'
+import type { SceneState } from '~/scene/SceneController'
 import type { SceneViewport } from '~/scene/SceneViewport'
 
 /** `pending` until the scene has loaded; the fallback backdrop shows meanwhile. */
@@ -28,11 +29,40 @@ const createLazyScene = (canvas: HTMLCanvasElement) => {
   return { loadScene, playIntroStroke }
 }
 
+/**
+ * The painting tuning panel is dev only (ticket 17). In production `import.meta.dev` is false, so this is null and the
+ * panel and Tweakpane are never bundled.
+ */
+const loadPaintingTuningPanel = import.meta.dev ? () => import('~/scene/PaintingTuningPanel') : null
+
+/**
+ * In dev with `#debug` in the URL when the scene starts, shows the painting tuning panel while the moving scene runs,
+ * and removes it otherwise (no panel on the still frame). Returns a function that stops following and removes it.
+ */
+const followSceneWithTuningPanel = (tuning: SceneTuning, sceneState: Ref<BackgroundSceneState>) => {
+  if (!loadPaintingTuningPanel || window.location.hash !== '#debug') return () => {}
+  const loadPanel = loadPaintingTuningPanel
+  let removePanel: Promise<() => void> | null = null
+  const hidePanel = () => {
+    void removePanel?.then(remove => remove())
+    removePanel = null
+  }
+  const stopWatching = watch(sceneState, (state) => {
+    if (state !== 'running') hidePanel()
+    else removePanel ??= loadPanel().then(({ mountPaintingTuningPanel }) => mountPaintingTuningPanel(tuning))
+  })
+  return () => {
+    stopWatching()
+    hidePanel()
+  }
+}
+
 /** Mounts the background scene into `canvas` once the browser is idle after first paint, and tears it down on unmount. */
 export const useBackgroundScene = (canvas: Ref<HTMLCanvasElement | null>) => {
   const sceneState = ref<BackgroundSceneState>('pending')
   let cancelIdle = () => {}
   let disposeScene = () => {}
+  let stopTuningPanel = () => {}
 
   const startScene = () => {
     if (!canvas.value) return
@@ -46,6 +76,7 @@ export const useBackgroundScene = (canvas: Ref<HTMLCanvasElement | null>) => {
       },
     })
     disposeScene = controller.dispose
+    stopTuningPanel = followSceneWithTuningPanel(controller.tuning, sceneState)
     void controller.start()
   }
 
@@ -55,6 +86,7 @@ export const useBackgroundScene = (canvas: Ref<HTMLCanvasElement | null>) => {
 
   onBeforeUnmount(() => {
     cancelIdle()
+    stopTuningPanel()
     disposeScene()
   })
 

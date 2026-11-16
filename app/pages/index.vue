@@ -7,7 +7,7 @@ const { t } = useI18n()
   <main class="landing-page content-layer">
     <CompanyLogo />
     <h1 class="landing-page__company-name">N2Shader</h1>
-    <p class="landing-page__slogan">{{ t('landingPage.slogan') }}</p>
+    <p class="landing-page__description">{{ t('landingPage.description') }}</p>
     <ContactDetailsList class="landing-page__contact-details" />
   </main>
 </template>
@@ -34,12 +34,17 @@ const { t } = useI18n()
   letter-spacing: -0.02em;
 }
 
-.landing-page__slogan {
+.landing-page__description {
   margin: 0;
-  max-inline-size: 32ch;
+  /*
+   * Wide enough that the paragraph takes about four lines on a 568×320 landscape phone (an estimate, not yet seen in a
+   * browser; ticket 10), and under AAA's 80 characters per line (1.4.8).
+   */
+  max-inline-size: 60ch;
   font-size: var(--type-body);
   line-height: 1.35;
-  text-wrap: balance;
+  /* `pretty`, not `balance`: browsers stop balancing after a few lines. */
+  text-wrap: pretty;
 }
 
 .landing-page__contact-details {

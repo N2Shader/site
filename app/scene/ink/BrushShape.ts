@@ -1,6 +1,5 @@
 import type { Node } from 'three/webgpu'
 import { clamp, dot, exp, length, max, smoothstep, step, vec2 } from 'three/tsl'
-import { SceneSettings } from '../SceneSettings'
 import { valueNoise } from './ShaderNoise'
 import type { InkUniforms } from './InkUniforms'
 
@@ -34,7 +33,7 @@ export const brushPushFalloff = (uniforms: InkUniforms, pixel: Vec2Node) => {
  * that open up between the bristles as the load runs low.
  */
 export const brushCoverage = (uniforms: InkUniforms, pixel: Vec2Node) => {
-  const { raggedness, splay, dryLoad } = SceneSettings.brush
+  const { raggedness, splay, dryLoad } = uniforms.settings.brush
   const radius = uniforms.brushRadius
   const { distance, along, across } = measureBrushLine(uniforms, pixel)
   const raggedEdge = valueNoise(pixel.div(radius.mul(0.3)))
@@ -43,7 +42,7 @@ export const brushCoverage = (uniforms: InkUniforms, pixel: Vec2Node) => {
     .mul(raggedEdge.sub(0.5).mul(raggedness).add(1))
     .mul(splayedBristles.sub(0.5).mul(splay).add(1))
   const body = smoothstep(edgeRadius.mul(0.6), edgeRadius, distance).oneMinus()
-  const dryness = clamp(uniforms.brushLoad.oneMinus().sub(1 - dryLoad).div(dryLoad), 0, 1).mul(0.9)
+  const dryness = clamp(uniforms.brushLoad.oneMinus().sub(dryLoad.oneMinus()).div(dryLoad), 0, 1).mul(0.9)
   const bristle = valueNoise(vec2(across.div(radius.mul(0.07)), along.div(radius.mul(4))))
   const gaps = smoothstep(dryness.sub(0.08), dryness.add(0.08), bristle)
   return body.mul(gaps).mul(brushIsActive(uniforms))

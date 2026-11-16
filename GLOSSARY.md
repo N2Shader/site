@@ -1,6 +1,6 @@
-# n2Shader site
+# N2Shader site
 
-The public one-screen landing page that introduces the company n2Shader and tells visitors how to reach it.
+The public one-screen landing page that introduces the company N2Shader and tells visitors how to reach it.
 
 ## Page
 
@@ -9,7 +9,7 @@ The single screen of the site, in one locale. There are no other pages.
 _Avoid_: Home, homepage, index
 
 **Content layer**:
-Everything on the landing page that carries meaning: company name, logo, slogan, contact details and the locale switch.
+Everything on the landing page that carries meaning: company name, logo, description, contact details and the locale switch.
 _Avoid_: Foreground, UI, overlay
 
 **Background scene**:
@@ -45,23 +45,27 @@ _Avoid_: Intro animation, demo stroke, hint
 ## Company
 
 **Company name**:
-"n2Shader", written with that exact capitalisation.
-_Avoid_: N2Shader, n2shader, N2S
+"N2Shader", written with that exact capitalisation (lowercase only in the domain and email address).
+_Avoid_: n2Shader, n2shader, N2S
 
 **Slogan**:
-The short line under the company name saying what n2Shader does.
+The first sentence of the description, used only as the JSON-LD `slogan`. Not shown on the page.
 _Avoid_: Tagline, description, subtitle
 
+**Description**:
+The paragraph under the company name saying what N2Shader does. The meta description, the JSON-LD and llms.txt use it too.
+_Avoid_: Slogan, summary, about
+
 **Contact details**:
-The three ways to reach n2Shader shown on the page: one email address, one phone number and one postal address.
+The three ways to reach N2Shader shown on the page: one email address, one phone number and one postal address.
 _Avoid_: Contacts, contact info, contact section
 
 **Office address**:
-The postal address of n2Shader. Clients don't visit it.
+Where N2Shader is based: town, county and country on one line (Haworth, West Yorkshire, England), no street. Clients don't visit it.
 _Avoid_: Location, store, headquarters
 
 **Public profiles**:
-n2Shader's accounts on other sites (LinkedIn, GitHub, etc.). They aren't shown on the page.
+N2Shader's accounts on other sites (LinkedIn, GitHub, etc.). They aren't shown on the page.
 _Avoid_: Socials, social links
 
 ## Locales

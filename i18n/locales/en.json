@@ -1,16 +1,20 @@
 {
   "landingPage": {
-    "logoLabel": "n2Shader logo",
-    "slogan": "PLACEHOLDER: what n2Shader does, in one line."
+    "logoLabel": "N2Shader logo",
+    "slogan": "Every website is a one-of-a-kind piece of digital art.",
+    "description": "At N2Shader, every website is a one-of-a-kind piece of digital art. We build immersive experiences that make customers feel something before they read a single word, because that is what they remember."
+  },
+  "localeSwitch": {
+    "hintInOtherLocale": "cambiar el idioma de la página"
   },
   "contactDetails": {
-    "email": "hello{'@'}n2shader.com",
-    "phoneE164": "+34600000000",
-    "phoneDisplay": "+34 600 000 000",
+    "email": "n2shader{'@'}gmail.com",
+    "phoneE164": "+447771444593",
+    "phoneDisplay": "+44 7771 444593",
     "officeAddress": {
-      "street": "PLACEHOLDER Street 1",
-      "locality": "28001 Madrid",
-      "country": "Spain"
+      "locality": "Haworth",
+      "region": "West Yorkshire",
+      "country": "England"
     }
   }
 }

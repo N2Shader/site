@@ -1,13 +1,12 @@
 // The contact details of the current locale, read from the locale messages: the one source
 // shared by the markup and (later) the JSON-LD (ADR-0003).
 // The email and phone repeat in every locale file by choice; keep them in sync.
-// TODO(copy): the email, phone and office address in i18n/locales/ are placeholders.
 type ContactDetails = {
   email: string
   emailHref: string
   phoneDisplay: string
   phoneHref: string
-  officeAddressLines: string[]
+  officeAddress: string
 }
 
 export const useContactDetails = () => {
@@ -20,11 +19,12 @@ export const useContactDetails = () => {
       emailHref: `mailto:${email}`,
       phoneDisplay: t('contactDetails.phoneDisplay'),
       phoneHref: `tel:${t('contactDetails.phoneE164')}`,
-      officeAddressLines: [
-        t('contactDetails.officeAddress.street'),
+      // One line, as the owner writes it, so the stack keeps room for the description.
+      officeAddress: [
         t('contactDetails.officeAddress.locality'),
+        t('contactDetails.officeAddress.region'),
         t('contactDetails.officeAddress.country'),
-      ],
+      ].join(', '),
     }
   })
 }

@@ -1,14 +1,14 @@
-# Spec: n2Shader landing page v1
+# Spec: N2Shader landing page v1
 
 ## Goal
-A visitor (or a search/answer engine) landing on n2shader.com learns who n2Shader is and how to reach them, in English or Spanish, on one screen.
+A visitor (or a search/answer engine) landing on n2shader.com learns who N2Shader is and how to reach them, in English or Spanish, on one screen.
 
 ## Users
-- People looking for n2Shader or its services, on desktop and mobile, including keyboard and screen-reader users.
+- People looking for N2Shader or its services, on desktop and mobile, including keyboard and screen-reader users.
 - Search engines and AI answer engines that index or quote the company.
 
 ## Content layer (per locale)
-Company name "n2Shader" (the page's single `<h1>`), logo (the inline favicon SVG with an accessible name), slogan, and contact details: email (`mailto:`), phone (`tel:` in E.164 format, displayed in local format), office address (plain text in `<address>`). Plus a locale switch in a corner. Copy is placeholder until the owner provides it.
+Company name "N2Shader" (the page's single `<h1>`), logo (the inline favicon SVG with an accessible name), description (the full paragraph), and contact details: email (`mailto:`), phone (`tel:` in E.164 format, displayed in local format), office address (plain text in `<address>`, one line). Plus a locale switch in a corner. The owner supplied the real copy on 2026-11-16 (ticket 10).
 
 ## Behaviour
 - `/` in English, `/es` in Spanish. Never redirects by browser language.

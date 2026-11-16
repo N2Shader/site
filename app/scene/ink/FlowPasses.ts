@@ -1,6 +1,5 @@
 import type { Node, TextureNode } from 'three/webgpu'
 import { abs, length, mix, screenUV, smoothstep, vec2, vec4 } from 'three/tsl'
-import { SceneSettings } from '../SceneSettings'
 import { brushPushFalloff } from './BrushShape'
 import { fragmentPixel } from './InkUniforms'
 import type { InkUniforms } from './InkUniforms'
@@ -33,7 +32,7 @@ const vorticityConfinement = (uniforms: InkUniforms) => {
   const swirlStrength = flowGradient(uniforms, (dx, dy) => abs(sampleFlowNeighbour(uniforms, uniforms.curl, dx, dy).x))
   const towardsSwirl = swirlStrength.div(length(swirlStrength).add(1e-5))
   const swirl = uniforms.curl.sample(screenUV).x
-  const scale = uniforms.flowCell.x.mul(SceneSettings.flow.vorticity)
+  const scale = uniforms.flowCell.x.mul(uniforms.settings.flow.vorticity)
   return vec2(towardsSwirl.y.mul(swirl), towardsSwirl.x.mul(swirl).negate()).mul(scale)
 }
 
@@ -42,13 +41,13 @@ const vorticityConfinement = (uniforms: InkUniforms) => {
  * the paper is wet.
  */
 export const createAdvectVelocityNode = (uniforms: InkUniforms) => {
-  const { velocityInjection } = SceneSettings.brush
+  const { velocityInjection } = uniforms.settings.brush
   const ownVelocity = uniforms.velocity.sample(screenUV).xy
   const tracedBack = screenUV.sub(ownVelocity.mul(uniforms.frameSeconds).div(uniforms.viewportSize))
   const carried = uniforms.velocity.sample(tracedBack).xy.add(vorticityConfinement(uniforms).mul(uniforms.frameSeconds))
   const brushPush = brushPushFalloff(uniforms, fragmentPixel(uniforms)).mul(velocityInjection)
   const pushed = mix(carried, uniforms.brushVelocity, brushPush)
-  const wetness = smoothstep(0, SceneSettings.flow.wetWater, uniforms.state.sample(screenUV).x)
+  const wetness = smoothstep(0, uniforms.settings.flow.wetWater, uniforms.state.sample(screenUV).x)
   return vec4(pushed.mul(uniforms.frictionKeep).mul(wetness), 0, 1)
 }
 

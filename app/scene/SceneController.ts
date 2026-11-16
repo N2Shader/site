@@ -1,31 +1,11 @@
 import { listenForBrushPointer } from './BrushPointer'
-import { SceneSettings } from './SceneSettings'
 import type { BrushPoint } from './BrushPointer'
+import type { IntroStrokePlayer, SceneAdapter, SceneTuning } from './SceneAdapter'
+import { SceneSettings } from './SceneSettings'
 import { measureSceneViewport } from './SceneViewport'
 import type { SceneViewport } from './SceneViewport'
 
 export type SceneState = 'running' | 'still' | 'failed'
-
-/** The rendering side of the background scene. The real one wraps three.js; tests use a fake. */
-export type SceneAdapter = {
-  /** Rebuilds the grid for the new size and clears the paper of ink. */
-  resize: (viewport: SceneViewport) => void
-  /** Clears to clean paper and draws one frame (the still frame). */
-  renderStillFrame: () => void
-  /** Runs the frame loop. `onPaperClean` fires on each frame that finds the paper clean with the brush laying nothing. */
-  startLoop: (onPaperClean: () => void) => void
-  stopLoop: () => void
-  moveBrush: (point: BrushPoint) => void
-  /** Ends the current stroke, so the next move starts a new one. */
-  liftBrush: () => void
-  dispose: () => void
-}
-
-/** The part of the scene the intro stroke paints with: the same brush input as the visitor's pointer. */
-export type IntroStrokeBrush = Pick<SceneAdapter, 'moveBrush' | 'liftBrush'>
-
-/** Starts the intro stroke on `brush` and returns a function that stops it early. */
-export type IntroStrokePlayer = (brush: IntroStrokeBrush, viewport: SceneViewport) => () => void
 
 export type MotionQuery = Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>
 
@@ -87,11 +67,15 @@ export const createSceneController = ({
     scene.moveBrush(point)
   }
 
+  const playIntro = (scene: SceneAdapter) => {
+    stopIntro = playIntroStroke({ moveBrush: moveBrushWakingLoop(scene), liftBrush: scene.liftBrush }, readViewport(target))
+  }
+
   /** The intro stroke plays once per visit, the first time the moving scene runs. */
   const playIntroOnce = (scene: SceneAdapter) => {
     if (hasPlayedIntro) return
     hasPlayedIntro = true
-    stopIntro = playIntroStroke({ moveBrush: moveBrushWakingLoop(scene), liftBrush: scene.liftBrush }, readViewport(target))
+    playIntro(scene)
   }
 
   /** Stops the intro stroke and lifts the brush, so whatever paints next starts a new line. */
@@ -146,14 +130,40 @@ export const createSceneController = ({
     else if (!isRunning()) runMovingScene(adapter)
   }
 
+  /** The loop draws the changed paper (waking for a frame if it slept); the still frame is drawn again. */
+  const redrawScene = (scene: SceneAdapter) => {
+    if (isRunning()) wakeLoop(scene)
+    else scene.renderStillFrame()
+  }
+
   const rebuildAtViewportSize = () => {
     if (!adapter) return
     // The resize clears the paper, and the intro's path was laid out for the old size.
     stopIntroEarly(adapter)
     adapter.resize(readViewport(target))
-    // Resizing clears the canvas. The loop draws the new paper (waking for a frame if it slept); the still frame is drawn again.
-    if (isRunning()) wakeLoop(adapter)
-    else adapter.renderStillFrame()
+    redrawScene(adapter)
+  }
+
+  /** Runs a tuning change on the loaded scene, then redraws. A change that wipes the ink stops the intro stroke first. */
+  const tuneScene = (tuneAdapter: (scene: SceneAdapter) => void, { wipesInk }: { wipesInk: boolean }) => {
+    if (!adapter) return
+    if (wipesInk) stopIntroEarly(adapter)
+    tuneAdapter(adapter)
+    redrawScene(adapter)
+  }
+
+  const tuning: SceneTuning = {
+    applyTunedSettings: () => tuneScene(scene => scene.applyTunedSettings(), { wipesInk: false }),
+    clearInk: () => tuneScene(scene => scene.clearInk(), { wipesInk: true }),
+    useQualityTier: choice => tuneScene(scene => scene.useQualityTier(choice), { wipesInk: true }),
+    replayIntroStroke: () => {
+      if (!adapter || !isRunning()) return
+      stopIntroEarly(adapter)
+      playIntro(adapter)
+    },
+    liftBrush: () => {
+      if (adapter && isRunning()) liftVisitorBrush(adapter)()
+    },
   }
 
   /** The loop sleeps while the tab is hidden, and wakes when it shows again; it goes back to sleep if the paper is clean. */
@@ -200,5 +210,5 @@ export const createSceneController = ({
     adapter = null
   }
 
-  return { start, dispose }
+  return { start, dispose, tuning }
 }

@@ -91,3 +91,29 @@
 1. /build-ticket 16
 2. (input answers) focused link: paper plate + ring; test seam: none, CSS only
 3. (code review applied: blend on every content-layer element without a link, single shadow, wording)
+
+## Build ticket 17: tweakpane painting controls — 2026-11-16 10:39
+
+1. /build-ticket 17
+2. (grilling answers) dev only; live uniforms; painting groups (brush, ink, flow, look, introStroke); copy as SceneSettings snippet
+3. (grilling answers) extras: clear the sheet, quality tier switch; no panel on reduced motion; placement: top left, default position of tweakpane; ranges: wide, uniform
+4. (grilling answers) top-right, Tweakpane default; start open only when the #debug hash is on the URL; snippet: all five groups; record: row in ADR-0007
+5. (grilling answers) only appear with #debug, otherwise not even imported; wake loop + live clock; tier switch and clear both start clean
+6. (grilling answers) dev only with #debug; read at load only; test seams: no test
+7. (input answer) confirmed the summary: build it
+8. (input answer) intro stroke folder: add a replay button
+9. (code review applied: pointerenter lift, panel floors instead of shader guards, tier choice kept across remounts, clearInk/applyTunedSettings names)
+
+## Real copy and contact details (ticket 10) — 2026-11-16 13:03
+
+1. Real data: email n2shader@gmail.com, tel +44 7771444593, address Haworth, West Yorkshire, England, and the description; update every part of the app and the tickets that use it
+2. (input answers) slogan: split, first sentence is the slogan and the full text is the description; name: "N2Shader" everywhere
+3. The text after the h1 is just one line; show the full description there
+
+## Build ticket 02: locale switch and alternate links — 2026-11-16 13:45
+
+1. what should be my next ticket?
+2. /build-ticket 02
+3. (input answers) test seams: e2e head tags and e2e switch link; landmark: bare link
+4. (input answers) og:locale: en-GB / es-ES now; alignment: keep centred; tab order: first, but give screen readers more than "Español" (a language-switch hint); corner: accept and note it
+

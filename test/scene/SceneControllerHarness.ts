@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import { createSceneController } from '../../app/scene/SceneController'
-import type { IntroStrokeBrush, SceneAdapter, SceneState } from '../../app/scene/SceneController'
+import type { IntroStrokeBrush, SceneAdapter } from '../../app/scene/SceneAdapter'
+import type { SceneState } from '../../app/scene/SceneController'
 
 /** Shared setup for the SceneController specs: a fake scene, motion setting and intro stroke, and window events. */
 export const createFakeAdapter = (): SceneAdapter => ({
@@ -10,6 +11,9 @@ export const createFakeAdapter = (): SceneAdapter => ({
   stopLoop: vi.fn(),
   moveBrush: vi.fn(),
   liftBrush: vi.fn(),
+  applyTunedSettings: vi.fn(),
+  clearInk: vi.fn(),
+  useQualityTier: vi.fn(),
   dispose: vi.fn(),
 })
 

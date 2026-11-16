@@ -1,3 +1,5 @@
+import EnglishMessages from './i18n/locales/en.json'
+
 const SITE_URL = 'https://n2shader.com'
 
 export default defineNuxtConfig({
@@ -24,7 +26,7 @@ export default defineNuxtConfig({
   // Shared by sitemap, robots and schema-org (ADR-0003).
   site: {
     url: SITE_URL,
-    name: 'n2Shader',
+    name: 'N2Shader',
   },
   // ADR-0002: English at /, Spanish at /es, no browser-language redirect.
   i18n: {
@@ -33,22 +35,23 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,
     // Messages in i18n/locales/ hold the copy and the contact details, the one source for markup and JSON-LD (ADR-0003).
+    // Regional codes, so og:locale gets the en_GB / es_ES form Open Graph expects; hreflang lists both forms.
     locales: [
-      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
-      { code: 'es', language: 'es', name: 'Español', file: 'es.json' },
+      { code: 'en', language: 'en-GB', name: 'English', file: 'en.json' },
+      { code: 'es', language: 'es-ES', name: 'Español', file: 'es.json' },
     ],
   },
-  // TODO(copy): placeholder text until the real slogan and description arrive (ADR-0006).
+  // The English description from the locale messages, so llms.txt says what the page says (ADR-0003).
   llms: {
     domain: SITE_URL,
-    title: 'n2Shader',
-    description: 'PLACEHOLDER: one-paragraph description of what n2Shader does.',
+    title: 'N2Shader',
+    description: EnglishMessages.landingPage.description,
     sections: [
       {
         title: 'Pages',
         links: [
-          { title: 'n2Shader (English)', href: '/' },
-          { title: 'n2Shader (Español)', href: '/es' },
+          { title: 'N2Shader (English)', href: '/' },
+          { title: 'N2Shader (Español)', href: '/es' },
         ],
       },
     ],

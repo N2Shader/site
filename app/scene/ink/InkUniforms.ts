@@ -1,5 +1,6 @@
 import { Texture, Vector2 } from 'three/webgpu'
 import { screenUV, texture, uniform } from 'three/tsl'
+import { createSettingsUniforms } from './SettingsUniforms'
 
 /**
  * Inputs shared by every pass. Grids are read through one texture node each; the simulation points that node at the
@@ -30,6 +31,9 @@ export const createInkUniforms = () => ({
   brushRadius: uniform(10),
   brushStrength: uniform(0),
   brushLoad: uniform(1),
+
+  /** The brush, flow, ink and look numbers from `SceneSettings`, as uniforms the dev tuning panel can change live. */
+  settings: createSettingsUniforms(),
 
   paper: texture(new Texture()),
   state: texture(new Texture()),

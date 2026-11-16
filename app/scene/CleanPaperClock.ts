@@ -5,7 +5,7 @@ import { SceneSettings } from './SceneSettings'
  * per second, so water follows `w' = -(s·w + c)` and reaches zero at `ln(1 + s/c) / s`.
  */
 const measureDryingSeconds = () => {
-  // Widened from the settings' literal types: a retuned share of 0 would divide by zero below.
+  // Widened from the settings' literal types: the dev tuning panel can set the share to 0, which would divide by zero.
   const share: number = SceneSettings.ink.evaporationShare
   const perSecond: number = SceneSettings.ink.evaporationPerSecond
   if (share === 0) return 1 / perSecond
@@ -23,10 +23,10 @@ const measureSecondsUntilClean = () => {
 
 /**
  * Says when the paper is clean (no wet ink, all dried ink faded) without reading the GPU back. It counts the same
- * simulated seconds the ink simulation steps by, so slow, clamped frames slow it down just as they slow the ink.
+ * simulated seconds the ink simulation steps by, so slow, clamped frames slow it down just as they slow the ink. It reads
+ * the settings on every check, so a retune from the dev tuning panel moves the clean time at once.
  */
 export const createCleanPaperClock = () => {
-  const secondsUntilClean = measureSecondsUntilClean()
   let secondsSinceInk = Number.POSITIVE_INFINITY
 
   return {
@@ -39,7 +39,7 @@ export const createCleanPaperClock = () => {
       secondsSinceInk = Number.POSITIVE_INFINITY
     },
     /** No wet ink is left and all dried ink has faded. */
-    isPaperClean: () => secondsSinceInk >= secondsUntilClean,
+    isPaperClean: () => secondsSinceInk >= measureSecondsUntilClean(),
   }
 }
 

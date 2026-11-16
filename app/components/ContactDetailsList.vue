@@ -12,14 +12,7 @@ const contactDetails = useContactDetails()
       <a :href="contactDetails.phoneHref">{{ contactDetails.phoneDisplay }}</a>
     </li>
     <li>
-      <address>
-        <template
-          v-for="(officeAddressLine, lineIndex) in contactDetails.officeAddressLines"
-          :key="lineIndex"
-        >
-          <br v-if="lineIndex > 0">{{ officeAddressLine }}
-        </template>
-      </address>
+      <address>{{ contactDetails.officeAddress }}</address>
     </li>
   </ul>
 </template>

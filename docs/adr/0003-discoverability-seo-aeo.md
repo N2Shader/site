@@ -4,5 +4,5 @@ SEO and answer-engine optimisation (AEO) are the reason the site exists, so each
 
 ## Consequences
 
-- The office address is typed as `Organization.address`, not `LocalBusiness`: n2Shader isn't a walk-in business, so no opening hours or geo coordinates.
+- The office address is typed as `Organization.address`, not `LocalBusiness`: N2Shader isn't a walk-in business, so no opening hours or geo coordinates.
 - Structured data must stay in sync with the visible contact details. Both come from the same locale content.

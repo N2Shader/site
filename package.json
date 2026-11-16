@@ -26,10 +26,12 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
     "@nuxt/test-utils": "^4.4.0",
+    "@tweakpane/core": "2.0.5",
     "@types/three": "^0.187.0",
     "@vue/test-utils": "^2.5.1",
     "eslint": "^10.14.0",
     "happy-dom": "^21.0.4",
+    "tweakpane": "4.0.5",
     "typescript": "^6.0.3",
     "vitest": "^5.1.0",
     "vue-tsc": "^3.3.14"

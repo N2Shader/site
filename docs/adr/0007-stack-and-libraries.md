@@ -12,3 +12,4 @@ Nuxt 4 + TypeScript + pnpm (the owner's usual stack). Libraries are limited to w
 | Styling | Plain scoped CSS + one tokens file | One screen doesn't justify a CSS framework |
 | Background scene | `three` (`three/webgpu` `WebGPURenderer` + TSL) + `gsap`, no TresJS | TresJS was tried and removed. A single decorative scene is mounted imperatively in the browser (ADR-0001). TSL render-target passes run on WebGPU and on its WebGL2 fallback; GSAP drives the intro stroke (ADR-0008) |
 | Analytics | None | ADR-0006 |
+| Dev tuning panel | `tweakpane` (+ `@tweakpane/core` for its types), devDependencies only | Live sliders for the ink painting's `SceneSettings` (ticket 17). Loaded only under `nuxt dev` with `#debug` in the URL. `import.meta.dev` is false in production, so neither the panel nor Tweakpane is ever bundled and Lighthouse is unaffected (ADR-0006) |

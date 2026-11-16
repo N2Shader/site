@@ -7,38 +7,38 @@ const mountLandingPageAt = (route: string) => mountSuspended(LandingPage, { rout
 describe.each([
   {
     route: '/',
-    logoLabel: 'n2Shader logo',
-    slogan: 'PLACEHOLDER: what n2Shader does, in one line.',
-    country: 'Spain',
+    logoLabel: 'N2Shader logo',
+    description: 'At N2Shader, every website is a one-of-a-kind piece of digital art. We build immersive experiences that make customers feel something before they read a single word, because that is what they remember.',
+    country: 'England',
   },
   {
     route: '/es',
-    logoLabel: 'Logotipo de n2Shader',
-    slogan: 'PLACEHOLDER: qué hace n2Shader, en una línea.',
-    country: 'España',
+    logoLabel: 'Logotipo de N2Shader',
+    description: 'En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que hacen sentir algo a los clientes antes de que lean una sola palabra, porque eso es lo que recuerdan.',
+    country: 'Inglaterra',
   },
-])('Landing page at $route', ({ route, logoLabel, slogan, country }) => {
+])('Landing page at $route', ({ route, logoLabel, description, country }) => {
   it('shows the company name as the single heading, with a named logo', async () => {
     const wrapper = await mountLandingPageAt(route)
 
     const headings = wrapper.findAll('h1')
     expect(headings).toHaveLength(1)
-    expect(headings[0]!.text()).toBe('n2Shader')
+    expect(headings[0]!.text()).toBe('N2Shader')
     expect(wrapper.find('svg[role="img"]').attributes('aria-label')).toBe(logoLabel)
 
     wrapper.unmount()
   })
 
-  it('shows the slogan and the three contact details in its locale', async () => {
+  it('shows the description and the three contact details in its locale', async () => {
     const wrapper = await mountLandingPageAt(route)
 
-    expect(wrapper.text()).toContain(slogan)
+    expect(wrapper.text()).toContain(description)
     const emailLink = wrapper.find('a[href^="mailto:"]')
-    expect(emailLink.attributes('href')).toBe('mailto:hello@n2shader.com')
-    expect(emailLink.text()).toBe('hello@n2shader.com')
+    expect(emailLink.attributes('href')).toBe('mailto:n2shader@gmail.com')
+    expect(emailLink.text()).toBe('n2shader@gmail.com')
     const phoneLink = wrapper.find('a[href^="tel:"]')
-    expect(phoneLink.attributes('href')).toBe('tel:+34600000000')
-    expect(phoneLink.text()).toBe('+34 600 000 000')
+    expect(phoneLink.attributes('href')).toBe('tel:+447771444593')
+    expect(phoneLink.text()).toBe('+44 7771 444593')
     expect(wrapper.find('address').text()).toContain(country)
 
     wrapper.unmount()

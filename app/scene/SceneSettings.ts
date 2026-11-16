@@ -1,4 +1,8 @@
-/** Tuning constants for the background scene, including every ink simulation constant (ticket 12). */
+/**
+ * Tuning constants for the background scene, including every ink simulation constant (ticket 12). In dev, the tuning
+ * panel (`#debug`, ticket 17) edits the brush, introStroke, flow, ink and look groups in place, so code must read them
+ * when it uses them, not copy them once. Shader code reads them through `SettingsUniforms`.
+ */
 export const SceneSettings = {
   /** Neutral off-white paper. Must match `--paper` in tokens.css (the fallback backdrop). */
   paperColor: '#f4f2ee',

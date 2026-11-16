@@ -19,37 +19,37 @@ const slopeOf = (readAt: (uv: Node<'vec2'>) => FloatNode, step: Node<'vec2'>) =>
  * Kubelka-Munk reflectance of an opaque layer of ink, from its absorption-to-scattering ratio. Neutral, so ink runs
  * from paper white through greys to black without a colour cast.
  */
-const inkReflectance = (density: FloatNode) => {
-  const { inkAbsorption, inkToneExponent } = SceneSettings.look
+const inkReflectance = (uniforms: InkUniforms, density: FloatNode) => {
+  const { inkAbsorption, inkToneExponent } = uniforms.settings.look
   const ratio = pow(density, inkToneExponent).mul(inkAbsorption)
   return ratio.add(1).sub(sqrt(ratio.mul(ratio).add(ratio.mul(2))))
 }
 
 /** Paper lit by its own height, tinted by its mottle. */
 const shadePaper = (uniforms: InkUniforms, height: FloatNode, mottle: FloatNode) => {
-  const { relief, mottle: mottleTint } = SceneSettings.look
+  const { relief, mottle: mottleTint } = uniforms.settings.look
   const slope = slopeOf(uv => uniforms.paper.sample(uv).x, uniforms.paperTexel)
-  const lighting = dot(slope, lightDirection).mul(-relief).add(height.sub(0.5).mul(relief * 0.5)).add(1)
-  return color(SceneSettings.paperColor).mul(lighting).mul(mottle.sub(0.5).mul(-2 * mottleTint).add(1))
+  const lighting = dot(slope, lightDirection).mul(relief.negate()).add(height.sub(0.5).mul(relief.mul(0.5))).add(1)
+  return color(SceneSettings.paperColor).mul(lighting).mul(mottle.sub(0.5).mul(mottleTint.mul(-2)).add(1))
 }
 
 /** Gloss on wet ink, brightest where the water's surface tilts towards the light. */
 const wetSheen = (uniforms: InkUniforms, water: FloatNode) => {
   const paintStep = uniforms.paintCell.div(uniforms.viewportSize)
   const surfaceTilt = dot(slopeOf(uv => uniforms.state.sample(uv).x, paintStep), lightDirection).negate()
-  return smoothstep(0, 0.04, surfaceTilt).mul(smoothstep(0, 0.15, water)).mul(SceneSettings.look.wetSheen)
+  return smoothstep(0, 0.04, surfaceTilt).mul(smoothstep(0, 0.15, water)).mul(uniforms.settings.look.wetSheen)
 }
 
 /** Draw: the paper, the ink on it, a sheen on wet ink, a faint vignette and grain that doesn't move. */
 export const createDrawNode = (uniforms: InkUniforms) => {
-  const { floatingInkWeight, vignette, grain } = SceneSettings.look
+  const { floatingInkWeight, vignette, grain } = uniforms.settings.look
   const ink = uniforms.state.sample(screenUV)
   const paper = uniforms.paper.sample(screenUV)
-  const granulation = paper.x.oneMinus().sub(0.5).mul(SceneSettings.ink.granulation).add(1)
+  const granulation = paper.x.oneMinus().sub(0.5).mul(uniforms.settings.ink.granulation).add(1)
   const density = max(ink.z.add(ink.y.mul(floatingInkWeight)), 0).mul(granulation)
-  const inked = shadePaper(uniforms, paper.x, paper.z).mul(inkReflectance(density)).add(wetSheen(uniforms, ink.x))
+  const inked = shadePaper(uniforms, paper.x, paper.z).mul(inkReflectance(uniforms, density)).add(wetSheen(uniforms, ink.x))
   const corner = smoothstep(0.3, 1, length(screenUV.sub(0.5)).mul(Math.SQRT2))
-  const vignetted = inked.mul(corner.mul(-vignette).add(1))
+  const vignetted = inked.mul(corner.mul(vignette.negate()).add(1))
   const filmGrain = hashCell(floor(screenUV.div(uniforms.paperTexel))).sub(0.5).mul(grain)
   return vec4(vignetted.add(filmGrain), 1)
 }
