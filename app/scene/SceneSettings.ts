@@ -9,13 +9,39 @@ export const SceneSettings = {
 
   /** Grids the simulation runs on. Sizes are relative to the viewport in CSS pixels. */
   grid: {
-    /** Paint grid cells per CSS pixel. */
-    paintCellsPerPixel: 1,
-    /** Longest side of the paint grid, so huge screens don't blow the fill budget. */
-    maxPaintCells: 1600,
     /** The water flow grid runs at half the paint grid's resolution. */
     flowScale: 0.5,
   },
+
+  /**
+   * The two quality tiers (ticket 15). A device gets the high tier when it has a fine pointer and at least these cores
+   * and this much memory. A value the browser doesn't report doesn't count against it.
+   */
+  highTier: {
+    minCores: 8,
+    minMemoryGb: 8,
+  },
+  quality: {
+    high: {
+      /** Paint grid cells per CSS pixel. */
+      paintCellsPerPixel: 1,
+      /** Longest side of the paint grid, so huge screens don't blow the fill budget. */
+      maxPaintCells: 1600,
+      /** Jacobi pressure iterations per frame. */
+      pressureIterations: 20,
+      /** Sideways soak iterations per frame. */
+      spreadIterations: 4,
+    },
+    low: {
+      paintCellsPerPixel: 0.5,
+      maxPaintCells: 800,
+      pressureIterations: 10,
+      spreadIterations: 2,
+    },
+  },
+
+  /** Simulated seconds added on top of the worked-out drying and fading time before the paper counts as clean. */
+  cleanPaperMarginSeconds: 1,
 
   /** Frame time limits in seconds, so a dropped frame never makes the simulation jump. */
   minFrameSeconds: 1 / 240,
@@ -66,8 +92,6 @@ export const SceneSettings = {
   },
 
   flow: {
-    /** Jacobi pressure iterations per frame. */
-    pressureIterations: 20,
     /** Vorticity confinement strength: keeps small swirls alive. */
     vorticity: 18,
     /** Share of velocity lost per second to the paper's friction. */
@@ -77,8 +101,6 @@ export const SceneSettings = {
   },
 
   ink: {
-    /** Sideways soak iterations per frame. */
-    spreadIterations: 4,
     /** Soak rate between neighbouring cells, scaled by permeability. Keep under 0.25 for stability. */
     spreadRate: 0.2,
     /** Water below this counts as dry paper. */

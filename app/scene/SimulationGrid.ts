@@ -1,3 +1,4 @@
+import type { QualityTier } from './QualityTier'
 import { SceneSettings } from './SceneSettings'
 import type { SceneViewport } from './SceneViewport'
 
@@ -19,9 +20,12 @@ const scaleGrid = (width: number, height: number, scale: number): GridSize => ({
   height: Math.max(1, Math.round(height * scale)),
 })
 
-/** Sizes of the simulation's grids for a viewport. */
-export const measureSimulationGrid = ({ width, height, pixelRatio }: SceneViewport): SimulationGrid => {
-  const { paintCellsPerPixel, maxPaintCells, flowScale } = SceneSettings.grid
+/** Sizes of the simulation's grids for a viewport. The low quality tier gets a coarser paint grid. */
+export const measureSimulationGrid = (
+  { width, height, pixelRatio }: SceneViewport,
+  { paintCellsPerPixel, maxPaintCells }: QualityTier,
+): SimulationGrid => {
+  const { flowScale } = SceneSettings.grid
   const paintScale = Math.min(paintCellsPerPixel, maxPaintCells / Math.max(width, height, 1))
   const paint = scaleGrid(width, height, paintScale)
   return {

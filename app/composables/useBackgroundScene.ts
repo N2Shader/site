@@ -39,6 +39,7 @@ export const useBackgroundScene = (canvas: Ref<HTMLCanvasElement | null>) => {
     const controller = createSceneController({
       target: window,
       reducedMotionQuery: window.matchMedia('(prefers-reduced-motion: reduce)'),
+      pageVisibility: document,
       ...createLazyScene(canvas.value),
       onStateChange: (state) => {
         sceneState.value = state

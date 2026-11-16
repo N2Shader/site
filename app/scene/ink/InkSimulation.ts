@@ -1,5 +1,6 @@
 import type { RenderTarget, WebGPURenderer } from 'three/webgpu'
 import type { BrushDab } from '../BrushStroke'
+import type { QualityTier } from '../QualityTier'
 import { SceneSettings } from '../SceneSettings'
 import type { SceneViewport } from '../SceneViewport'
 import type { SimulationGrid } from '../SimulationGrid'
@@ -77,9 +78,15 @@ const createSimulationPasses = (uniforms: InkUniforms) => ({
 
 /**
  * The black-ink painting simulation (ADR-0008): water flow, then carry, spread and settle the ink, then draw. Every
- * step is a full-screen pass into ping-pong render targets, so it runs on WebGPU and on the WebGL2 fallback.
+ * step is a full-screen pass into ping-pong render targets, so it runs on WebGPU and on the WebGL2 fallback. The quality
+ * tier sets how many pressure and spread iterations run per frame.
  */
-export const createInkSimulation = (renderer: WebGPURenderer, viewport: SceneViewport, grid: SimulationGrid) => {
+export const createInkSimulation = (
+  renderer: WebGPURenderer,
+  viewport: SceneViewport,
+  grid: SimulationGrid,
+  { pressureIterations, spreadIterations }: QualityTier,
+) => {
   const uniforms = createInkUniforms()
   const passes = createSimulationPasses(uniforms)
   let targets = createSheetTargets(grid)
@@ -128,7 +135,7 @@ export const createInkSimulation = (renderer: WebGPURenderer, viewport: SceneVie
     renderPass(passes.curl, targets.curl)
     renderPingPong(passes.advectVelocity, targets.velocity)
     renderPass(passes.divergence, targets.divergence)
-    renderPingPong(passes.pressure, targets.pressure, SceneSettings.flow.pressureIterations)
+    renderPingPong(passes.pressure, targets.pressure, pressureIterations)
     renderPingPong(passes.project, targets.velocity)
   }
 
@@ -137,7 +144,7 @@ export const createInkSimulation = (renderer: WebGPURenderer, viewport: SceneVie
     setFrame(uniforms, frameSeconds, dab)
     flowWater()
     renderPingPong(passes.carry, targets.state)
-    renderPingPong(passes.spread, targets.state, SceneSettings.ink.spreadIterations)
+    renderPingPong(passes.spread, targets.state, spreadIterations)
     renderPingPong(passes.settle, targets.state)
   }
 

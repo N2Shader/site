@@ -12,7 +12,8 @@ export type SceneAdapter = {
   resize: (viewport: SceneViewport) => void
   /** Clears to clean paper and draws one frame (the still frame). */
   renderStillFrame: () => void
-  startLoop: () => void
+  /** Runs the frame loop. `onPaperClean` fires on each frame that finds the paper clean with the brush laying nothing. */
+  startLoop: (onPaperClean: () => void) => void
   stopLoop: () => void
   moveBrush: (point: BrushPoint) => void
   /** Ends the current stroke, so the next move starts a new one. */
@@ -28,9 +29,13 @@ export type IntroStrokePlayer = (brush: IntroStrokeBrush, viewport: SceneViewpor
 
 export type MotionQuery = Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>
 
+/** Whether the tab is hidden, and its `visibilitychange` event. The real one is `document`. */
+export type PageVisibility = Pick<Document, 'hidden' | 'addEventListener' | 'removeEventListener'>
+
 export type SceneControllerOptions = {
   target: Window
   reducedMotionQuery: MotionQuery
+  pageVisibility: PageVisibility
   loadScene: (viewport: SceneViewport) => Promise<SceneAdapter>
   playIntroStroke: IntroStrokePlayer
   onStateChange: (state: SceneState) => void
@@ -44,11 +49,13 @@ const readViewport = (target: Window) => measureSceneViewport({
 
 /**
  * Runs the background scene: loads it, picks the moving scene or the still frame from the
- * visitor's motion setting, and follows that setting while the page is open.
+ * visitor's motion setting, and follows that setting while the page is open. While the moving scene runs, its frame
+ * loop sleeps when the paper is clean and the brush is idle, and while the tab is hidden.
  */
 export const createSceneController = ({
   target,
   reducedMotionQuery,
+  pageVisibility,
   loadScene,
   playIntroStroke,
   onStateChange,
@@ -57,14 +64,34 @@ export const createSceneController = ({
   let stopBrushPointer: (() => void) | null = null
   let stopIntro: (() => void) | null = null
   let hasPlayedIntro = false
+  let isLoopAwake = false
   let resizeTimer: ReturnType<typeof setTimeout> | undefined
   let disposed = false
+
+  const sleepLoop = (scene: SceneAdapter) => {
+    if (!isLoopAwake) return
+    isLoopAwake = false
+    scene.stopLoop()
+  }
+
+  /** Starts the frame loop unless it's already running or the tab is hidden. */
+  const wakeLoop = (scene: SceneAdapter) => {
+    if (isLoopAwake || pageVisibility.hidden) return
+    isLoopAwake = true
+    scene.startLoop(() => sleepLoop(scene))
+  }
+
+  /** Any brush move, the visitor's or the intro stroke's, wakes the loop so the ink gets painted. */
+  const moveBrushWakingLoop = (scene: SceneAdapter) => (point: BrushPoint) => {
+    wakeLoop(scene)
+    scene.moveBrush(point)
+  }
 
   /** The intro stroke plays once per visit, the first time the moving scene runs. */
   const playIntroOnce = (scene: SceneAdapter) => {
     if (hasPlayedIntro) return
     hasPlayedIntro = true
-    stopIntro = playIntroStroke(scene, readViewport(target))
+    stopIntro = playIntroStroke({ moveBrush: moveBrushWakingLoop(scene), liftBrush: scene.liftBrush }, readViewport(target))
   }
 
   /** Stops the intro stroke and lifts the brush, so whatever paints next starts a new line. */
@@ -76,9 +103,12 @@ export const createSceneController = ({
   }
 
   /** The visitor's pointer takes the brush over from the intro stroke straight away, on a move or a tap. */
-  const moveVisitorBrush = (scene: SceneAdapter) => (point: BrushPoint) => {
-    stopIntroEarly(scene)
-    scene.moveBrush(point)
+  const moveVisitorBrush = (scene: SceneAdapter) => {
+    const moveBrush = moveBrushWakingLoop(scene)
+    return (point: BrushPoint) => {
+      stopIntroEarly(scene)
+      moveBrush(point)
+    }
   }
 
   const liftVisitorBrush = (scene: SceneAdapter) => () => {
@@ -88,7 +118,7 @@ export const createSceneController = ({
 
   const runMovingScene = (scene: SceneAdapter) => {
     stopBrushPointer = listenForBrushPointer(target, moveVisitorBrush(scene), liftVisitorBrush(scene))
-    scene.startLoop()
+    wakeLoop(scene)
     playIntroOnce(scene)
     onStateChange('running')
   }
@@ -101,7 +131,7 @@ export const createSceneController = ({
     stopIntroEarly(scene)
     stopBrushPointer()
     stopBrushPointer = null
-    scene.stopLoop()
+    sleepLoop(scene)
   }
 
   const showStillFrame = (scene: SceneAdapter) => {
@@ -121,8 +151,16 @@ export const createSceneController = ({
     // The resize clears the paper, and the intro's path was laid out for the old size.
     stopIntroEarly(adapter)
     adapter.resize(readViewport(target))
-    // A running loop redraws by itself; the still frame has to be drawn again.
-    if (!isRunning()) adapter.renderStillFrame()
+    // Resizing clears the canvas. The loop draws the new paper (waking for a frame if it slept); the still frame is drawn again.
+    if (isRunning()) wakeLoop(adapter)
+    else adapter.renderStillFrame()
+  }
+
+  /** The loop sleeps while the tab is hidden, and wakes when it shows again; it goes back to sleep if the paper is clean. */
+  const followPageVisibility = () => {
+    if (!adapter || !isRunning()) return
+    if (pageVisibility.hidden) sleepLoop(adapter)
+    else wakeLoop(adapter)
   }
 
   const onResize = () => {
@@ -146,6 +184,7 @@ export const createSceneController = ({
     adapter = loadedScene
     reducedMotionQuery.addEventListener('change', applyMotionPreference)
     target.addEventListener('resize', onResize)
+    pageVisibility.addEventListener('visibilitychange', followPageVisibility)
     applyMotionPreference()
   }
 
@@ -153,6 +192,7 @@ export const createSceneController = ({
     disposed = true
     reducedMotionQuery.removeEventListener('change', applyMotionPreference)
     target.removeEventListener('resize', onResize)
+    pageVisibility.removeEventListener('visibilitychange', followPageVisibility)
     clearTimeout(resizeTimer)
     if (!adapter) return
     stopRunning(adapter)

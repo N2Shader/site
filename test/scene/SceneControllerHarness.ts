@@ -69,6 +69,7 @@ export const setupController = ({ reduce = false, loadFails = false } = {}) => {
   const controller = createSceneController({
     target: window,
     reducedMotionQuery: motion.query,
+    pageVisibility: document,
     loadScene,
     playIntroStroke: intro.playIntroStroke,
     onStateChange: state => states.push(state),

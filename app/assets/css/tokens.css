@@ -38,4 +38,9 @@
 
   --focus-ring-width: 3px;
   --focus-ring-offset: 3px;
+  /*
+   * Paper-coloured edge outside the focus ring over the running scene (base.css). The ring always sits on paper colour
+   * (16.5:1); the edge against the ink is what keeps the indicator visible: about 3.5:1 on mid-grey, more on black.
+   */
+  --focus-ring-paper-edge: 2px;
 }

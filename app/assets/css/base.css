@@ -56,18 +56,38 @@ a {
  * pending, still frame (reduced motion), failed and forced colours keep plain dark text. Give `.content-layer` to each
  * top-level content block (the main stack, the locale switch), never to a wrapper of the background scene. The scene
  * must stay in the root stacking context, so the blend has the ink to blend with.
+ *
+ * The blend sits on every element of the content layer that holds no link, never on a group that does (`<main>`, the
+ * contact list): a child can't escape its parent's blend, so a focused link inside a blended group couldn't leave it
+ * (ticket 16). The white text goes with the blend, so text in an unblended group stays plain dark, never white on
+ * paper. Inside the content layer, nothing that holds a link may become a stacking context (opacity, transform,
+ * filter, isolation, `position: fixed/sticky`, a positioned `z-index`), or the links' blend loses the ink.
+ * Where `:has()` isn't supported, the rule drops and the text stays plain dark.
  */
 @media not (forced-colors: active) {
   /* The state values come from BackgroundSceneState (app/composables/useBackgroundScene.ts). */
-  html[data-background-scene='running'] .content-layer {
+  html[data-background-scene='running'] :is(.content-layer, .content-layer *):not(:has(a)) {
     color: var(--text-colour-blended);
     mix-blend-mode: difference;
+  }
+
+  /*
+   * A focused link leaves the blend and sits on a paper-coloured plate with plain dark text, inside a dark ring with a
+   * paper-coloured edge, so the text and the ring stay readable over paper, black ink and mid-grey ink (ADR-0009,
+   * ticket 16). The shadow paints under the outline: it fills the gap between text and ring and shows past the ring.
+   */
+  html[data-background-scene='running'] a:is(.content-layer, .content-layer *):focus-visible {
+    mix-blend-mode: normal;
+    color: var(--text-colour);
+    background-color: var(--paper);
+    box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
+      var(--paper);
   }
 }
 
 /*
- * Visible focus (WCAG 2.4.7, 2.4.13): a solid ring in the text colour, clear of the text. Over the running scene the
- * ring is drawn inside the blended content layer, so it inverts with the text and shows on paper and on ink.
+ * Visible focus (WCAG 2.4.7, 2.4.13): a solid ring in the text colour, clear of the text. Over the running scene a
+ * focused link also gets the paper-coloured plate above.
  */
 :focus-visible {
   outline: var(--focus-ring-width) solid currentColor;

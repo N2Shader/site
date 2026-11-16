@@ -79,3 +79,15 @@
 ## Tweakpane ticket — 2026-11-15 22:20
 
 1. Add a new ticket, add tweakpane to the experience, focus on the painting, use grilling to understand what is happening, this will take it later for now just add the ticket
+
+## Build ticket 15: idle sleep and quality tiers — 2026-11-16 00:00
+
+1. /build-ticket 15
+2. (input answers) test seams: none; clean check: CPU timer
+3. (input answer) half-float fade review finding: follow-up ticket 18
+
+## Build ticket 16: unblended focus ring — 2026-11-16 10:32
+
+1. /build-ticket 16
+2. (input answers) focused link: paper plate + ring; test seam: none, CSS only
+3. (code review applied: blend on every content-layer element without a link, single shadow, wording)

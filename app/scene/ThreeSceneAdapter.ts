@@ -1,6 +1,8 @@
 import { WebGPURenderer } from 'three/webgpu'
 import { createBrushStroke } from './BrushStroke'
+import { createCleanPaperClock } from './CleanPaperClock'
 import { createInkSimulation } from './ink/InkSimulation'
+import { readQualityTier } from './QualityTier'
 import type { SceneAdapter } from './SceneController'
 import { SceneSettings } from './SceneSettings'
 import type { SceneViewport } from './SceneViewport'
@@ -19,6 +21,17 @@ const createRenderer = async (canvas: HTMLCanvasElement) => {
   return renderer
 }
 
+/** The renderer's internal frame clock. Not in its public types (three r187). */
+type RendererWithFrameClock = { _animation?: { stop?: () => void } }
+
+/**
+ * Stops the renderer's own requestAnimationFrame. Every render restarts it, and `setAnimationLoop(null)` only drops our
+ * callback, so without this a sleeping scene (or the still frame) would still wake the page every frame.
+ */
+const stopRendererFrameClock = (renderer: WebGPURenderer) => {
+  (renderer as unknown as RendererWithFrameClock)._animation?.stop?.()
+}
+
 const shortSideOf = ({ width, height }: SceneViewport) => Math.min(width, height)
 
 /** Seconds since the last frame, kept in a range so a dropped frame never makes the simulation jump. */
@@ -34,41 +47,56 @@ const sizeCanvas = (renderer: WebGPURenderer, { width, height, pixelRatio }: Sce
   renderer.setSize(width, height, false)
 }
 
-/** The real background scene: the ink simulation drawn by a three.js WebGPURenderer. Loaded lazily (ADR-0008). */
+/**
+ * The real background scene: the ink simulation drawn by a three.js WebGPURenderer. Loaded lazily, at the quality tier
+ * the device gets (ADR-0008).
+ */
 export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneViewport): Promise<SceneAdapter> => {
   const renderer = await createRenderer(canvas)
   sizeCanvas(renderer, viewport)
-  const simulation = createInkSimulation(renderer, viewport, measureSimulationGrid(viewport))
+  const qualityTier = readQualityTier(window)
+  const simulation = createInkSimulation(renderer, viewport, measureSimulationGrid(viewport, qualityTier), qualityTier)
   const brush = createBrushStroke(shortSideOf(viewport))
+  const paperClock = createCleanPaperClock()
   let lastFrameMs: number | null = null
 
+  /** Steps and draws one frame, and says whether the paper is clean with the brush laying nothing. */
   const renderMovingFrame = (nowMs: number) => {
     const frameSeconds = measureFrameSeconds(lastFrameMs, nowMs)
     lastFrameMs = nowMs
-    simulation.step(frameSeconds, brush.takeFrameDab(frameSeconds))
+    const dab = brush.takeFrameDab(frameSeconds)
+    paperClock.advanceFrame(frameSeconds, dab !== null)
+    simulation.step(frameSeconds, dab)
     simulation.draw()
+    return paperClock.isPaperClean()
   }
 
   const resize = (nextViewport: SceneViewport) => {
     sizeCanvas(renderer, nextViewport)
-    simulation.startSheet(nextViewport, measureSimulationGrid(nextViewport))
+    simulation.startSheet(nextViewport, measureSimulationGrid(nextViewport, qualityTier))
     brush.resetForSheet(shortSideOf(nextViewport))
+    paperClock.markPaperClean()
   }
 
-  const startLoop = () => {
+  const startLoop = (onPaperClean: () => void) => {
     lastFrameMs = null
-    void renderer.setAnimationLoop(renderMovingFrame)
+    void renderer.setAnimationLoop((nowMs) => {
+      if (renderMovingFrame(nowMs)) onPaperClean()
+    })
   }
 
   const stopLoop = () => {
     void renderer.setAnimationLoop(null)
+    stopRendererFrameClock(renderer)
   }
 
   return {
     resize,
     renderStillFrame: () => {
       simulation.clearInk()
+      paperClock.markPaperClean()
       simulation.draw()
+      stopRendererFrameClock(renderer)
     },
     startLoop,
     stopLoop,
