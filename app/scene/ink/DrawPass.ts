@@ -1,5 +1,5 @@
 import type { Node } from 'three/webgpu'
-import { color, dot, floor, length, max, pow, screenUV, smoothstep, sqrt, vec2, vec4 } from 'three/tsl'
+import { color, dot, floor, length, max, min, pow, screenUV, smoothstep, sqrt, vec2, vec4 } from 'three/tsl'
 import { SceneSettings } from '../SceneSettings'
 import { hashCell } from './ShaderNoise'
 import type { InkUniforms } from './InkUniforms'
@@ -19,10 +19,18 @@ const slopeOf = (readAt: (uv: Node<'vec2'>) => FloatNode, step: Node<'vec2'>) =>
  * Kubelka-Munk reflectance of an opaque layer of ink, from its absorption-to-scattering ratio. Neutral, so ink runs
  * from paper white through greys to black without a colour cast.
  */
-const inkReflectance = (uniforms: InkUniforms, density: FloatNode) => {
+const kubelkaMunkReflectance = (uniforms: InkUniforms, density: FloatNode) => {
   const { inkAbsorption, inkToneExponent } = uniforms.settings.look
   const ratio = pow(density, inkToneExponent).mul(inkAbsorption)
   return ratio.add(1).sub(sqrt(ratio.mul(ratio).add(ratio.mul(2))))
+}
+
+/** The Kubelka-Munk greys, stretched so the ink is pure black at `blackDensity` and above. */
+const inkReflectance = (uniforms: InkUniforms, density: FloatNode) => {
+  const { blackDensity } = uniforms.settings.look
+  const black = kubelkaMunkReflectance(uniforms, blackDensity)
+  const reflectance = kubelkaMunkReflectance(uniforms, min(density, blackDensity))
+  return max(reflectance.sub(black).div(max(black.oneMinus(), 1e-3)), 0)
 }
 
 /** Paper lit by its own height, tinted by its mottle. */

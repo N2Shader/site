@@ -52,10 +52,16 @@ export const SceneSettings = {
   maxFrameSeconds: 1 / 30,
 
   brush: {
-    /** Brush radius as a share of the screen's short side (the brush is about 4% wide). */
-    radiusOfShortSide: 0.02,
-    /** Speed, in short sides per second, at which the brush lays its full ink. */
-    fullInkSpeed: 1.2,
+    /** Pen size: the brush radius at a slow stroke, as a share of the screen's short side (about 9% wide). */
+    radiusOfShortSide: 0.0457609,
+    /** Speed, in short sides per second, at which the line is at its thinnest. */
+    thinnestSpeed: 1.2,
+    /** Share of the pen size left at the thinnest speed. Fast strokes are thinner, never lighter. */
+    fastWidthShare: 0.117402,
+    /** Seconds the line's width takes to follow a change of speed (about two thirds of the way). */
+    widthEaseSeconds: 0.08,
+    /** Outer share of the pen's radius that fades from black to grey. Inside it, the pen lays solid black. */
+    softEdgeShare: 0.4,
     /** Below this speed, in short sides per second, the brush lays nothing. */
     restSpeed: 0.02,
     /** Load spent per short side travelled at full speed. Long, fast strokes run dry. */
@@ -64,9 +70,9 @@ export const SceneSettings = {
     slowDrainShare: 0.3,
     /** Seconds at rest for an empty brush to refill. */
     refillSeconds: 0.8,
-    /** Water and floating ink a full-strength brush lays per frame. */
+    /** Water the brush adds per frame, and the floating ink it fills a cell up to wherever it fully touches. */
     water: 0.55,
-    ink: 0.5,
+    ink: 1,
     /** How much the brush pushes the water along its path, and the share of its speed the water picks up. */
     velocityInjection: 0.6,
     velocityShare: 0.3,
@@ -98,24 +104,32 @@ export const SceneSettings = {
   flow: {
     /** Vorticity confinement strength: keeps small swirls alive. */
     vorticity: 18,
-    /** Share of velocity lost per second to the paper's friction. */
-    frictionPerSecond: 2.5,
+    /** Share of velocity lost per second to the paper's friction (times `ink.dryingSpeed`). */
+    frictionPerSecond: 4,
     /** Water at which the paper counts as fully wet for the flow. */
     wetWater: 0.08,
   },
 
   ink: {
+    /**
+     * One knob for how soon wet ink stops moving: it multiplies evaporation, settling into the paper and the water's
+     * friction. 1 is the values below; 2 dries twice as fast.
+     */
+    dryingSpeed: 2.01685,
     /** Soak rate between neighbouring cells, scaled by permeability. Keep under 0.25 for stability. */
     spreadRate: 0.2,
     /** Water below this counts as dry paper. */
     dryWater: 0.004,
     /** A wet edge only creeps into dry paper when the water behind it is above this (pinning). */
     pinWater: 0.12,
-    /** Water lost per second to evaporation, plus a share of what's left. */
-    evaporationPerSecond: 0.035,
-    evaporationShare: 0.25,
-    /** Share of floating ink that settles into the paper per second. */
-    depositPerSecond: 0.5,
+    /**
+     * Water lost per second to evaporation, plus a share of what's left (times `dryingSpeed`). The wettest cell dries in
+     * about 4 s at drying speed 1, about 2 s at the tuned 2.
+     */
+    evaporationPerSecond: 0.08,
+    evaporationShare: 0.5,
+    /** Share of floating ink that settles into the paper per second (times `dryingSpeed`). */
+    depositPerSecond: 1,
     /** Extra deposit in the paper's low spots (granulation) and at wet edges (dark edges). */
     granulation: 0.8,
     edgeDarkening: 2.5,
@@ -130,6 +144,8 @@ export const SceneSettings = {
     /** Kubelka-Munk absorption at full ink density, and the curve that spreads thin ink over the greys. */
     inkAbsorption: 6,
     inkToneExponent: 2,
+    /** Ink density at and above which the ink is pure black, so the middle of a stroke is black, not dark grey. */
+    blackDensity: 0.8,
     /** Weight of still-floating ink in the drawn density. */
     floatingInkWeight: 0.8,
     /** Paper lighting from its height, and the tint of its mottle. */

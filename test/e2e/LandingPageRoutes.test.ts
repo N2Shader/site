@@ -1,27 +1,16 @@
 // @vitest-environment node
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { $fetch, setup } from '@nuxt/test-utils/e2e'
-import { Window } from 'happy-dom'
+import { setup } from '@nuxt/test-utils/e2e'
+import { DESCRIPTIONS, SITE_URL } from './LandingPageFixtures'
+import { fetchServerDocument } from './ServerDocument'
 
 // Builds and serves the app once, then reads the server HTML: what crawlers get (ADR-0001).
 await setup({ rootDir: fileURLToPath(new URL('../..', import.meta.url)) })
 
-const SITE_URL = 'https://n2shader.com'
-
-const fetchServerDocument = async (route: string) => {
-  const html = await $fetch<string>(route, { responseType: 'text' })
-  const window = new Window({
-    url: 'http://localhost/',
-    settings: { disableJavaScriptFileLoading: true, disableCSSFileLoading: true },
-  })
-  window.document.write(html)
-  return window.document
-}
-
 describe.each([
-  { route: '/', lang: 'en-GB', description: 'At N2Shader, every website is a one-of-a-kind piece of digital art. We build immersive experiences that make customers feel something before they read a single word, because that is what they remember.', country: 'England' },
-  { route: '/es', lang: 'es-ES', description: 'En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que hacen sentir algo a los clientes antes de que lean una sola palabra, porque eso es lo que recuerdan.', country: 'Inglaterra' },
+  { route: '/', lang: 'en-GB', description: DESCRIPTIONS.en, country: 'England' },
+  { route: '/es', lang: 'es-ES', description: DESCRIPTIONS.es, country: 'Inglaterra' },
 ])('server HTML at $route', ({ route, lang, description, country }) => {
   it(`is in ${lang} and holds the name, description and three contact details`, async () => {
     const serverDocument = await fetchServerDocument(route)
@@ -57,8 +46,9 @@ const readHreflangAlternates = (serverDocument: Document) =>
     ]),
   )
 
-const readMetaPropertyContents = (serverDocument: Document, property: string) =>
-  [...serverDocument.querySelectorAll(`meta[property="${property}"]`)].map((metaTag) => metaTag.getAttribute('content'))
+// Open Graph tags are keyed by `property`, the others by `name`.
+const readMetaContents = (serverDocument: Document, keyAttribute: 'property' | 'name', key: string) =>
+  [...serverDocument.querySelectorAll(`meta[${keyAttribute}="${key}"]`)].map((metaTag) => metaTag.getAttribute('content'))
 
 describe.each([
   { route: '/', canonical: SITE_URL, ogLocale: 'en_GB', ogLocaleAlternate: 'es_ES' },
@@ -76,19 +66,83 @@ describe.each([
       'es': `${SITE_URL}/es`,
       'es-ES': `${SITE_URL}/es`,
     })
-    expect(readMetaPropertyContents(serverDocument, 'og:locale')).toEqual([ogLocale])
-    expect(readMetaPropertyContents(serverDocument, 'og:locale:alternate')).toEqual([ogLocaleAlternate])
+    expect(readMetaContents(serverDocument, 'property', 'og:locale')).toEqual([ogLocale])
+    expect(readMetaContents(serverDocument, 'property', 'og:locale:alternate')).toEqual([ogLocaleAlternate])
+  })
+})
+
+describe.each([
+  { route: '/', description: DESCRIPTIONS.en },
+  { route: '/es', description: DESCRIPTIONS.es },
+])('search result tags at $route (ADR-0003)', ({ route, description }) => {
+  it('titles the page with the company name and describes it in its locale', async () => {
+    const serverDocument = await fetchServerDocument(route)
+
+    expect(readSingleElement(serverDocument, 'head title').textContent).toBe('N2Shader')
+    expect(readMetaContents(serverDocument, 'name', 'description')).toEqual([description])
+  })
+})
+
+describe.each(['/', '/es'])('site icons at %s', (route) => {
+  it('links the SVG favicon and the 180×180 apple touch icon', async () => {
+    const serverDocument = await fetchServerDocument(route)
+
+    const favicon = readSingleElement(serverDocument, 'link[rel="icon"]')
+    expect(favicon.getAttribute('href')).toBe('/favicon.svg')
+    expect(favicon.getAttribute('type')).toBe('image/svg+xml')
+    const appleTouchIcon = readSingleElement(serverDocument, 'link[rel="apple-touch-icon"]')
+    expect(appleTouchIcon.getAttribute('href')).toBe('/apple-touch-icon.png')
+    expect(appleTouchIcon.getAttribute('sizes')).toBe('180x180')
   })
 })
 
 describe.each([
   {
     route: '/',
-    otherLocale: { href: '/es', lang: 'es-ES', name: 'Español', accessibleName: 'Español: cambiar el idioma de la página' },
+    url: SITE_URL,
+    description: DESCRIPTIONS.en,
+    image: `${SITE_URL}/share-image-en.png`,
+    imageAlt: 'N2Shader logo and name, with the slogan: Every website is a one-of-a-kind piece of digital art.',
   },
   {
     route: '/es',
-    otherLocale: { href: '/', lang: 'en-GB', name: 'English', accessibleName: 'English: change the page language' },
+    url: `${SITE_URL}/es`,
+    description: DESCRIPTIONS.es,
+    image: `${SITE_URL}/share-image-es.png`,
+    imageAlt: 'Logotipo y nombre de N2Shader, con el lema: Cada sitio web es una obra de arte digital única.',
+  },
+])('share card tags at $route (ADR-0003)', ({ route, url, description, image, imageAlt }) => {
+  it('gives Open Graph the localized card with an absolute 1200×630 PNG', async () => {
+    const serverDocument = await fetchServerDocument(route)
+
+    expect(readMetaContents(serverDocument, 'property', 'og:type')).toEqual(['website'])
+    expect(readMetaContents(serverDocument, 'property', 'og:site_name')).toEqual(['N2Shader'])
+    expect(readMetaContents(serverDocument, 'property', 'og:title')).toEqual(['N2Shader'])
+    expect(readMetaContents(serverDocument, 'property', 'og:description')).toEqual([description])
+    expect(readMetaContents(serverDocument, 'property', 'og:url')).toEqual([url])
+    expect(readMetaContents(serverDocument, 'property', 'og:image')).toEqual([image])
+    expect(readMetaContents(serverDocument, 'property', 'og:image:type')).toEqual(['image/png'])
+    expect(readMetaContents(serverDocument, 'property', 'og:image:width')).toEqual(['1200'])
+    expect(readMetaContents(serverDocument, 'property', 'og:image:height')).toEqual(['630'])
+    expect(readMetaContents(serverDocument, 'property', 'og:image:alt')).toEqual([imageAlt])
+  })
+
+  it('asks X for the large image card and leaves the rest to the Open Graph tags', async () => {
+    const serverDocument = await fetchServerDocument(route)
+
+    expect(readMetaContents(serverDocument, 'name', 'twitter:card')).toEqual(['summary_large_image'])
+    expect(readMetaContents(serverDocument, 'name', 'twitter:image:alt')).toEqual([imageAlt])
+  })
+})
+
+describe.each([
+  {
+    route: '/',
+    otherLocale: { href: '/es', lang: 'es-ES', code: 'ES', accessibleName: 'ES, Español: cambiar el idioma de la página' },
+  },
+  {
+    route: '/es',
+    otherLocale: { href: '/', lang: 'en-GB', code: 'EN', accessibleName: 'EN, English: change the page language' },
   },
 ])('locale switch at $route', ({ route, otherLocale }) => {
   it('links to the other locale outside <main>, named and explained in that locale', async () => {
@@ -100,9 +154,11 @@ describe.each([
     expect(localeSwitch.getAttribute('lang')).toBe(otherLocale.lang)
     // Starts with the visible label, so voice control can say what it sees (2.5.3).
     expect(localeSwitch.textContent?.trim()).toBe(otherLocale.accessibleName)
-    expect(localeSwitch.textContent?.trim().startsWith(otherLocale.name)).toBe(true)
+    expect(localeSwitch.textContent?.trim().startsWith(otherLocale.code)).toBe(true)
     expect(localeSwitch.closest('main')).toBeNull()
-    // It inverts over the ink like the rest of the content layer (ADR-0009).
-    expect(localeSwitch.classList.contains('content-layer')).toBe(true)
+    // The flag is decorative: the text already names the language.
+    expect(localeSwitch.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    // A paper-coloured chip outside the difference blend, so the flag keeps its colours (ADR-0009).
+    expect(localeSwitch.closest('.content-layer')).toBeNull()
   })
 })

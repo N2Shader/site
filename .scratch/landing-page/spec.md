@@ -8,7 +8,7 @@ A visitor (or a search/answer engine) landing on n2shader.com learns who N2Shade
 - Search engines and AI answer engines that index or quote the company.
 
 ## Content layer (per locale)
-Company name "N2Shader" (the page's single `<h1>`), logo (the inline favicon SVG with an accessible name), description (the full paragraph), and contact details: email (`mailto:`), phone (`tel:` in E.164 format, displayed in local format), office address (plain text in `<address>`, one line). Plus a locale switch in a corner. The owner supplied the real copy on 2026-11-16 (ticket 10).
+Company name "N2Shader" (the page's single `<h1>`), logo (the original logo artwork as inline SVG with an accessible name; the favicon is a bolder variant, ticket 08), description (the full paragraph), and contact details: email (`mailto:`), phone (`tel:` in E.164 format, displayed in local format), office address (plain text in `<address>`, one line). Plus a locale switch in a corner. The owner supplied the real copy on 2026-11-16 (ticket 10).
 
 ## Behaviour
 - `/` in English, `/es` in Spanish. Never redirects by browser language.

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// The favicon mark (public/favicon.svg) inlined so it inherits the text colour and gets an accessible name.
+// The logo's original artwork inlined so it inherits the text colour and gets an accessible name.
+// public/favicon.svg is a bolder variant of these paths that reads at 16px (ticket 08); don't copy its stroke here.
 const { t } = useI18n()
 </script>
 

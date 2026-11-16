@@ -14,7 +14,7 @@ describe.each([
   {
     route: '/es',
     logoLabel: 'Logotipo de N2Shader',
-    description: 'En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que hacen sentir algo a los clientes antes de que lean una sola palabra, porque eso es lo que recuerdan.',
+    description: 'En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que tus usuarios no olvidarán.',
     country: 'Inglaterra',
   },
 ])('Landing page at $route', ({ route, logoLabel, description, country }) => {

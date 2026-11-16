@@ -35,7 +35,7 @@ The only colour in the background scene: black, or grey where it's thin. It runs
 _Avoid_: Paint, pigment, colour
 
 **Brush**:
-The invisible tool that follows the visitor's pointer and lays ink while it moves. It runs dry on long strokes.
+The invisible tool that follows the visitor's pointer and lays ink while it moves: a black core with a grey edge. The faster it moves, the thinner its line, never the lighter. It runs dry on long strokes.
 _Avoid_: Cursor, pen, stroke tool
 
 **Intro stroke**:
@@ -49,8 +49,12 @@ _Avoid_: Intro animation, demo stroke, hint
 _Avoid_: n2Shader, n2shader, N2S
 
 **Slogan**:
-The first sentence of the description, used only as the JSON-LD `slogan`. Not shown on the page.
+The first sentence of the description, used as the JSON-LD `slogan` and on the share image. Not shown on the page.
 _Avoid_: Tagline, description, subtitle
+
+**Share image**:
+The 1200×630 PNG, one per locale, that link previews show when someone shares the landing page (Open Graph and X cards).
+_Avoid_: OG image, social card, thumbnail
 
 **Description**:
 The paragraph under the company name saying what N2Shader does. The meta description, the JSON-LD and llms.txt use it too.
@@ -75,5 +79,5 @@ One language version of the landing page: English (the default) or Spanish.
 _Avoid_: Language version, translation, i18n
 
 **Locale switch**:
-The small link that moves a visitor between the English and Spanish landing pages.
+The small link that moves a visitor between the English and Spanish landing pages. It shows the other locale's flag and two-letter code ("EN", "ES") on a paper-coloured chip.
 _Avoid_: Language picker, language selector, toggle

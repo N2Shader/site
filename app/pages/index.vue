@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // The landing page's content layer: everything here is prerendered and indexable (ADR-0001).
 const { t } = useI18n()
+useLandingPageMeta()
+useOrganizationSchema()
 </script>
 
 <template>

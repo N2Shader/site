@@ -2,7 +2,10 @@
   "landingPage": {
     "logoLabel": "Logotipo de N2Shader",
     "slogan": "Cada sitio web es una obra de arte digital única.",
-    "description": "En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que hacen sentir algo a los clientes antes de que lean una sola palabra, porque eso es lo que recuerdan."
+    "description": "En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que tus usuarios no olvidarán."
+  },
+  "shareImage": {
+    "alt": "Logotipo y nombre de N2Shader, con el lema: @:landingPage.slogan"
   },
   "localeSwitch": {
     "hintInOtherLocale": "change the page language"

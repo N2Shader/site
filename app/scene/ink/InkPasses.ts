@@ -16,16 +16,19 @@ const paintNeighbourUv = (uniforms: InkUniforms, dx: number, dy: number, reach =
 /** Ink per unit of water, kept finite where there's almost no water. */
 const inkConcentration = (water: FloatNode, ink: FloatNode) => clamp(ink.div(max(water, 1e-3)), 0, 4)
 
-/** Carry: floating ink and water move along the flow, then the brush adds its own. Deposited ink stays put. */
+/**
+ * Carry: floating ink and water move along the flow, then the brush adds water and fills its cells up to its ink
+ * level. Filling (not adding) keeps a fast stroke as black as a slow one. Deposited ink stays put.
+ */
 export const createCarryNode = (uniforms: InkUniforms) => {
   const { water: brushWater, ink: brushInk } = uniforms.settings.brush
   const flow = uniforms.velocity.sample(screenUV).xy
   const carried = uniforms.state.sample(screenUV.sub(flow.mul(uniforms.frameSeconds).div(uniforms.viewportSize)))
   const here = uniforms.state.sample(screenUV)
-  const laid = brushCoverage(uniforms, fragmentPixel(uniforms)).mul(uniforms.brushStrength)
+  const laid = brushCoverage(uniforms, fragmentPixel(uniforms))
   return vec4(
     min(carried.x.add(laid.mul(brushWater)), 1),
-    min(carried.y.add(laid.mul(brushInk)), 1),
+    min(max(carried.y, laid.mul(brushInk)), 1),
     here.z,
     here.w,
   )
@@ -70,9 +73,9 @@ const wetEdge = (uniforms: InkUniforms, water: FloatNode) => {
 
 /** Share of the floating ink that settles into the paper this frame. Low spots and wet edges take more. */
 const settlingShare = (uniforms: InkUniforms, water: FloatNode, height: FloatNode) => {
-  const { depositPerSecond, granulation, edgeDarkening, dryWater } = uniforms.settings.ink
+  const { depositPerSecond, granulation, edgeDarkening, dryWater, dryingSpeed } = uniforms.settings.ink
   const lowSpot = max(height.oneMinus().sub(0.5).mul(granulation.mul(2)).add(1), 0.1)
-  const rate = lowSpot.mul(wetEdge(uniforms, water).mul(edgeDarkening).add(1)).mul(depositPerSecond)
+  const rate = lowSpot.mul(wetEdge(uniforms, water).mul(edgeDarkening).add(1)).mul(depositPerSecond).mul(dryingSpeed)
   // Once the water is nearly gone, all the floating ink dries into the paper.
   const drying = smoothstep(dryWater, dryWater.mul(6), water).oneMinus()
   return clamp(rate.mul(uniforms.frameSeconds).add(drying), 0, 1)
@@ -86,10 +89,10 @@ const fadeAmount = (uniforms: InkUniforms, age: FloatNode) => {
 
 /** Settle and fade: water evaporates, ink deposits into the paper and dries, and dried ink fades away. */
 export const createSettleNode = (uniforms: InkUniforms) => {
-  const { evaporationPerSecond, evaporationShare, maxDeposit, holdSeconds, fadeSeconds } = uniforms.settings.ink
+  const { evaporationPerSecond, evaporationShare, dryingSpeed, maxDeposit, holdSeconds, fadeSeconds } = uniforms.settings.ink
   const here = uniforms.state.sample(screenUV)
   const height = uniforms.paper.sample(screenUV).x
-  const evaporation = here.x.mul(evaporationShare).add(evaporationPerSecond).mul(uniforms.frameSeconds)
+  const evaporation = here.x.mul(evaporationShare).add(evaporationPerSecond).mul(dryingSpeed).mul(uniforms.frameSeconds)
   const water = max(here.x.sub(evaporation), 0)
   const settled = here.y.mul(settlingShare(uniforms, water, height))
   // Age restarts whenever ink settles here; capped so it never overflows the half float.

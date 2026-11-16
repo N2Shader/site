@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="22 10 106 106" width="2048" height="2048" fill="none" stroke="#000" stroke-width="1.5" stroke-linejoin="miter" stroke-linecap="butt">
-  <path d="M65 13.6 L125 62.8 L65 112.7 L25.4 80 L84.5 29.6"/>
-  <path d="M65 13.6 V112.7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18.7 5.2 113 113" fill="none" stroke="#000" stroke-width="7" stroke-linejoin="miter" stroke-linecap="butt">
+  <!-- Favicon-only variant of the logo (ticket 08): a 7-unit stroke draws ~1px lines in a 16px tab, the vertical line joins the outline so the top corner stays a clean point, and the viewBox fits the miter tips. The page logo (CompanyLogo.vue) keeps the original 1.5 stroke. -->
+  <style>@media (prefers-color-scheme: dark) { svg { stroke: #f4f2ee } }</style>
+  <path d="M65 112.7 V13.6 L125 62.8 L65 112.7 L25.4 80 L84.5 29.6"/>
   <path d="M105 46.4 L65 79.2"/>
   <path d="M45.4 62.9 L84.4 96.6"/>
 </svg>

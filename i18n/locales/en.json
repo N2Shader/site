@@ -4,6 +4,9 @@
     "slogan": "Every website is a one-of-a-kind piece of digital art.",
     "description": "At N2Shader, every website is a one-of-a-kind piece of digital art. We build immersive experiences that make customers feel something before they read a single word, because that is what they remember."
   },
+  "shareImage": {
+    "alt": "N2Shader logo and name, with the slogan: @:landingPage.slogan"
+  },
   "localeSwitch": {
     "hintInOtherLocale": "cambiar el idioma de la página"
   },

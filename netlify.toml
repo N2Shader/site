@@ -1,0 +1,66 @@
+# ADR-0001: prerendered with `nuxt generate`, served as static files.
+[build]
+  command = "pnpm generate"
+  publish = ".output/public"
+
+# NITRO_PRESET: on Netlify, nitro would pick its netlify-static preset, which writes to dist/
+# and adds its own _headers. The plain static preset keeps the local output, .output/public.
+[build.environment]
+  NODE_VERSION = "24"
+  PNPM_VERSION = "10.28.0"
+  NITRO_PRESET = "static"
+
+# One canonical host: www goes to the apex with a 301, keeping the path.
+# The http rule sends http://www to the apex in one hop instead of two.
+[[redirects]]
+  from = "https://www.n2shader.com/*"
+  to = "https://n2shader.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.n2shader.com/*"
+  to = "https://n2shader.com/:splat"
+  status = 301
+  force = true
+
+# Security headers on every response. Nuxt inlines a per-build config script and the component
+# styles, and the page has no user input or third-party code, so 'unsafe-inline' is the chosen
+# trade-off (ticket 09). The JSON-LD is never run as script, so script-src doesn't block it.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+
+# Cache-Control is set only on paths that don't overlap, so no two rules set it for one file.
+# Nuxt's build assets are hashed, so a year (builds/latest.json is fetched with a cache-busting
+# query, builds/meta/<buildId>.json is unique per build).
+[[headers]]
+  for = "/_nuxt/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The font file name has no hash, so a week rather than forever.
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# The landing pages: always revalidate, so a deploy shows at once. /es and /es/ both serve es/index.html.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/es"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/es/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

@@ -24,12 +24,15 @@ export const createInkUniforms = () => ({
   /** Share of velocity kept this frame after friction. */
   frictionKeep: uniform(1),
 
-  /** Brush line and state for this frame, in CSS pixels. Strength 0 means the brush lays nothing. */
+  /** Brush line and state for this frame, in CSS pixels. Active is 1 while the brush lays ink, 0 at rest. */
   brushFrom: uniform(new Vector2()),
   brushTo: uniform(new Vector2()),
   brushVelocity: uniform(new Vector2()),
+  /** The full pen size; the bristle noise is scaled by it, so the texture doesn't change as the line thins. */
   brushRadius: uniform(10),
-  brushStrength: uniform(0),
+  /** Share of the pen size this frame's line is drawn at (thinner when fast). */
+  brushWidth: uniform(1),
+  brushActive: uniform(0),
   brushLoad: uniform(1),
 
   /** The brush, flow, ink and look numbers from `SceneSettings`, as uniforms the dev tuning panel can change live. */

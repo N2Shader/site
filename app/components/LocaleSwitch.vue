@@ -1,24 +1,26 @@
 <script setup lang="ts">
-// The locale switch: a real link to the other locale, named in that locale's own language (ADR-0002).
-// `.content-layer` so it inverts over the ink (ADR-0009). Fixed on the link itself, never on a wrapper: a wrapper
-// would become a stacking context and cut the link's blend off from the ink (ticket 16).
-// The hidden hint tells screen readers what the link does. It's in the other locale's language (the link's `lang`),
-// since whoever follows it reads that language, and the name starts with the visible label (2.5.3).
+// The locale switch: a real link to the other locale (ADR-0002), shown as that locale's flag and two-letter code
+// ("EN", "ES") on a paper-coloured chip (`.paper-chip`, base.css). The chip stays out of the content layer's difference
+// blend (owner's choice, ADR-0009), so the flag keeps its true colours: plain dark text on paper over both paper and ink.
+// The hidden part names the language and says what the link does, in the other locale's language (the link's `lang`),
+// since whoever follows it reads that language. The accessible name starts with the visible code (2.5.3).
 const { t, locale, locales } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
 
 // ADR-0002 fixes two locales, so the other one is the one that isn't current.
 const otherLocale = computed(() => locales.value.find((configuredLocale) => configuredLocale.code !== locale.value)!)
+const otherLocaleAbbreviation = computed(() => otherLocale.value.code.toUpperCase())
 </script>
 
 <template>
   <NuxtLink
-    class="locale-switch content-layer"
+    class="locale-switch paper-chip"
     :to="switchLocalePath(otherLocale.code)"
     :hreflang="otherLocale.language"
     :lang="otherLocale.language"
   >
-    {{ otherLocale.name }}<span class="locale-switch__hint">: {{ t('localeSwitch.hintInOtherLocale') }}</span>
+    <LocaleFlag :locale-code="otherLocale.code" />
+    {{ otherLocaleAbbreviation }}<span class="locale-switch__hint">, {{ otherLocale.name }}: {{ t('localeSwitch.hintInOtherLocale') }}</span>
   </NuxtLink>
 </template>
 
@@ -32,8 +34,11 @@ const otherLocale = computed(() => locales.value.find((configuredLocale) => conf
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4em;
   min-block-size: 44px;
   min-inline-size: 44px;
+  /* The chip's paper colour and dark text come from `.paper-chip` (base.css). */
+  padding-block: 0;
   font-size: var(--type-small);
   line-height: 1.4;
 }

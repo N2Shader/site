@@ -2,12 +2,13 @@ import { SceneSettings } from './SceneSettings'
 
 /**
  * Simulated seconds for the wettest cell (water 1) to dry. The settle pass takes `(share × water + perSecond)` of water
- * per second, so water follows `w' = -(s·w + c)` and reaches zero at `ln(1 + s/c) / s`.
+ * per second, both times the drying speed, so water follows `w' = -(s·w + c)` and reaches zero at `ln(1 + s/c) / s`.
  */
 const measureDryingSeconds = () => {
+  const { dryingSpeed } = SceneSettings.ink
   // Widened from the settings' literal types: the dev tuning panel can set the share to 0, which would divide by zero.
-  const share: number = SceneSettings.ink.evaporationShare
-  const perSecond: number = SceneSettings.ink.evaporationPerSecond
+  const share: number = SceneSettings.ink.evaporationShare * dryingSpeed
+  const perSecond: number = SceneSettings.ink.evaporationPerSecond * dryingSpeed
   if (share === 0) return 1 / perSecond
   return Math.log(1 + share / perSecond) / share
 }

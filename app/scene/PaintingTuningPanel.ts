@@ -19,8 +19,37 @@ type EditableSettingGroup = Record<string, number | string>
 /** Counts that stay whole numbers, with the smallest value that still makes a path. */
 const wholeNumberFloors: Partial<Record<string, number>> = { bendKnots: 1, samples: 2 }
 
-/** Values the shaders divide by or use as a smoothstep edge: they stop at 1% of their default instead of 0. */
-const aboveZeroSettings = new Set(['radiusOfShortSide', 'dryLoad', 'wetWater', 'pinWater', 'fadeSeconds'])
+/**
+ * Values the shaders or the clean-paper clock divide by, or use as a smoothstep edge: they stop at 1% of their
+ * default instead of 0.
+ */
+const aboveZeroSettings = new Set([
+  'radiusOfShortSide',
+  'thinnestSpeed',
+  'fastWidthShare',
+  'widthEaseSeconds',
+  'softEdgeShare',
+  'dryLoad',
+  'wetWater',
+  'pinWater',
+  'fadeSeconds',
+  'dryingSpeed',
+  'blackDensity',
+])
+
+/** A plain-language slider over one `SceneSettings` value, for the top of the panel. */
+type PlainControl = { label: string, groupName: PaintingSettingGroupName, key: string }
+
+/**
+ * The few sliders most tuning needs. The raw values they edit are also in the Advanced folder, with the same range, so
+ * neither slider clamps the other.
+ */
+const plainControls: PlainControl[] = [
+  { label: 'Pen size', groupName: 'brush', key: 'radiusOfShortSide' },
+  { label: 'Width when fast', groupName: 'brush', key: 'fastWidthShare' },
+  { label: 'Grey edge', groupName: 'brush', key: 'softEdgeShare' },
+  { label: 'Drying speed', groupName: 'ink', key: 'dryingSpeed' },
+]
 
 /** Every value runs from 0 (or its floor) to 5× its default. */
 const rangeMultiplier = 5
@@ -43,10 +72,26 @@ const addSettingBinding = (folder: FolderApi, group: EditableSettingGroup, key: 
   folder.addBinding(group, key, params).on('change', onChange)
 }
 
-const addSettingFolder = (pane: Pane, groupName: PaintingSettingGroupName, tuning: SceneTuning) => {
-  const folder = pane.addFolder({ title: groupName, expanded: false })
-  const group = SceneSettings[groupName] as unknown as EditableSettingGroup
-  for (const key of Object.keys(group)) addSettingBinding(folder, group, key, tuning.applyTunedSettings)
+const readEditableGroup = (groupName: PaintingSettingGroupName) => SceneSettings[groupName] as unknown as EditableSettingGroup
+
+const addSettingFolder = (parent: FolderApi, groupName: PaintingSettingGroupName, onChange: () => void) => {
+  const folder = parent.addFolder({ title: groupName, expanded: false })
+  const group = readEditableGroup(groupName)
+  for (const key of Object.keys(group)) addSettingBinding(folder, group, key, onChange)
+}
+
+const addPlainControls = (pane: Pane, onChange: () => void) => {
+  for (const { label, groupName, key } of plainControls) {
+    const group = readEditableGroup(groupName)
+    const params = readNumberBindingParams(key, group[key] as number)
+    pane.addBinding(group, key, { label, ...params }).on('change', onChange)
+  }
+}
+
+/** Every raw value, grouped as in SceneSettings.ts, in one closed folder under the plain sliders. */
+const addAdvancedFolder = (pane: Pane, onChange: () => void) => {
+  const advanced = pane.addFolder({ title: 'Advanced', expanded: false })
+  for (const groupName of paintingSettingGroups) addSettingFolder(advanced, groupName, onChange)
 }
 
 /** Kept for the page's life: the panel comes back after a still frame, and the scene keeps the forced tier. */
@@ -119,7 +164,13 @@ export const mountPaintingTuningPanel = (tuning: SceneTuning) => {
   pane.addButton({ title: 'Replay intro stroke' }).on('click', tuning.replayIntroStroke)
   addQualityTierChoice(pane, tuning)
   addCopySnippetButton(pane)
-  for (const groupName of paintingSettingGroups) addSettingFolder(pane, groupName, tuning)
+  // A plain slider and its raw twin edit the same value, so each change redraws the panel to keep both in step.
+  const applyTunedSettings = () => {
+    tuning.applyTunedSettings()
+    pane.refresh()
+  }
+  addPlainControls(pane, applyTunedSettings)
+  addAdvancedFolder(pane, applyTunedSettings)
   const stopKeepingBrushOff = keepBrushOffPanel(pane.element, tuning.liftBrush)
 
   return () => {

@@ -117,3 +117,63 @@
 3. (input answers) test seams: e2e head tags and e2e switch link; landmark: bare link
 4. (input answers) og:locale: en-GB / es-ES now; alignment: keep centred; tab order: first, but give screen readers more than "Español" (a language-switch hint); corner: accept and note it
 
+
+## Build ticket 03: meta tags and share cards — 2026-11-16 14:20
+
+1. /build-ticket 03
+2. (input answers) title: name only ("N2Shader"); placeholder share image: logo + name + slogan; Twitter: card + image alt, rest from OG; test seams: e2e head tags + PNG size
+3. (code review applied: share image term + glossary, site config name, folder map, shared test fixtures)
+4. /build-ticket next
+5. (input answer) build ticket 04 next
+
+## Build ticket 04: Organization JSON-LD — 2026-11-16 15:10
+
+1. /build-ticket next → 04
+2. (input answers) logo: new logo.png 512×512; test seam: e2e JSON-LD graph; asked what sameAs is
+3. (input answer) sameAs: https://github.com/N2Shader and https://x.com/n2shader, nothing else for now
+4. (code review applied: folder map and sameAs constraint, country code constant, shared e2e fixtures, clearer test names)
+
+## Build ticket 08: favicon legibility — 2026-11-16 20:15
+
+1. /build-ticket 08
+2. (input answers) stroke 7 with the vertical joined into the outline; colours black / paper #f4f2ee in dark scheme; touch icon: bold mark on paper, ~20% padding; test seams: public file checks + e2e head links
+
+## Build ticket 09: Netlify config — 2026-11-16 16:00
+
+1. /build-ticket 09
+
+## Ticket 10 status check — 2026-11-16 20:30
+
+1. Is the ticket 10 already done? what is missing for closing it?
+2. update text in spanish: "En N2Shader, cada sitio web es una obra de arte digital única. Creamos experiencias inmersivas que tus usuarios no olvidarán." (accent on olvidarán)
+
+## Build ticket 05: sitemap, robots.txt and llms.txt — 2026-11-16 15:40
+
+1. /build-ticket 05
+2. (input answers) test seam: no test; robots.txt layout: whatever is best for SEO (one shared group)
+3. (code review applied: single sitemap.xml via `sitemaps: false`, absolute llms.txt links, clearer robots comment)
+3. (code review applied: shared readPublicFile, looser dark-scheme check, paper colour sync note, spec logo line)
+2. (input answers) CSP: static with 'unsafe-inline'; HSTS: 1 year + includeSubDomains, no preload; test seam: no test
+3. (code review applied: NITRO_PRESET=static so the publish dir exists on Netlify, shorter comments, folder map line)
+
+## Ink brush feel: pen width by speed, faster drying, black core (ticket 17 follow-up) — 2026-11-16 20:45
+
+1. The Tweakpane options are way too many and too complicated. Wanted: (1) speed changes the pen size, not the ink strength (fast = thinner but still black); (2) ink dries a little faster, keep the fluid motion but make it stop sooner; (3) grey/softer outer edge, pure black centre
+2. (input answer) panel: a few plain sliders on top, the raw sliders in a closed "Advanced" folder
+
+## Locale switch: flag and code — 2026-11-16 21:10
+
+1. Instead of "Español" and "English", show the abbreviation with a flag: ES and EN
+2. (input answers) colour flag on a paper chip; EN flag: United Kingdom
+
+## Text selection colours — 2026-11-16 21:30
+
+1. Highlighted (selected) text is barely readable; change the highlight colour with the new CSS syntax for better contrast
+
+## Contact details on paper chips — 2026-11-16 21:45
+
+1. What did you do with the locale button so it does not merge with the ink? Do the same for the email, phone and address
+
+## Tuned painting values — 2026-11-16 22:00
+
+1. New SceneSettings values from the panel snippet (pen size 0.0457609, width when fast 0.117402, drying speed 2.01685)

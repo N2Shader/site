@@ -1,6 +1,9 @@
 /* Design tokens: colours, font, the type scale and spacing (ticket 06). */
 :root {
-  /* Must match SceneSettings.paperColor (app/scene/SceneSettings.ts) and theme-color (nuxt.config.ts). */
+  /*
+   * Must match SceneSettings.paperColor (app/scene/SceneSettings.ts), theme-color (nuxt.config.ts), the favicon's
+   * dark-scheme stroke (public/favicon.svg) and the apple-touch-icon.png background.
+   */
   --paper: #f4f2ee;
   /* 16.5:1 against --paper, so every text size clears AAA's 7:1 (spec, Accessibility). */
   --text-colour: #141414;
@@ -9,6 +12,12 @@
    * White under a difference blend shows as #0b0d11 on --paper (about 17:1) and as white on black ink.
    */
   --text-colour-blended: #fff;
+  /*
+   * Selected text (base.css): dark highlight under paper-coloured text, 16.5:1. Under the difference blend the
+   * highlight takes --text-colour-blended and the text this black, which show the same way on paper (#0b0d11 under
+   * #f4f2ee, about 17:1) and as black on white over black ink.
+   */
+  --selection-text-colour-blended: #000;
 
   /*
    * Cascadia Mono (SIL OFL 1.1), one variable file covering weights 200–700: public/fonts/CascadiaMono-200-700.woff2.

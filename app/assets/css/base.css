@@ -54,7 +54,8 @@ a {
 /*
  * The content layer inverts over the ink (ADR-0009): dark on paper, light on ink. Only while the scene is running;
  * pending, still frame (reduced motion), failed and forced colours keep plain dark text. Give `.content-layer` to each
- * top-level content block (the main stack, the locale switch), never to a wrapper of the background scene. The scene
+ * top-level content block (the main stack), never to a wrapper of the background scene. The locale switch stays out:
+ * it's a paper-coloured chip, so its colour flag isn't inverted (ADR-0009). The scene
  * must stay in the root stacking context, so the blend has the ink to blend with.
  *
  * The blend sits on every element of the content layer that holds no link, never on a group that does (`<main>`, the
@@ -63,12 +64,22 @@ a {
  * paper. Inside the content layer, nothing that holds a link may become a stacking context (opacity, transform,
  * filter, isolation, `position: fixed/sticky`, a positioned `z-index`), or the links' blend loses the ink.
  * Where `:has()` isn't supported, the rule drops and the text stays plain dark.
+ * A `.paper-chip` (below), everything in it and every group around it stay out of the blend, for the same reason.
  */
 @media not (forced-colors: active) {
   /* The state values come from BackgroundSceneState (app/composables/useBackgroundScene.ts). */
-  html[data-background-scene='running'] :is(.content-layer, .content-layer *):not(:has(a)) {
+  html[data-background-scene='running'] :is(.content-layer, .content-layer *):not(:has(a, .paper-chip), .paper-chip, .paper-chip *) {
     color: var(--text-colour-blended);
     mix-blend-mode: difference;
+  }
+
+  /*
+   * Selected text in the blend: the highlight is painted inside the blended element, so it's inverted too. White
+   * under black inverts to the same dark highlight and paper-coloured text as the unblended selection below.
+   */
+  html[data-background-scene='running'] :is(.content-layer, .content-layer *):not(:has(a, .paper-chip), .paper-chip, .paper-chip *)::selection {
+    background-color: var(--text-colour-blended);
+    color: var(--selection-text-colour-blended);
   }
 
   /*
@@ -82,6 +93,36 @@ a {
     background-color: var(--paper);
     box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
       var(--paper);
+  }
+}
+
+/*
+ * A paper-coloured chip with plain dark text (16.5:1) that never inverts over the ink: the locale switch and each
+ * contact detail (owner's choice, ADR-0009). On bare paper it doesn't show; over the ink it's a small light box.
+ * The chip must not hold a blended element: the blend inside it would only see the chip, not the ink.
+ */
+.paper-chip {
+  padding: 0.15em 0.5em;
+  border-radius: 0.25rem;
+  background-color: var(--paper);
+  color: var(--text-colour);
+}
+
+/* A focused chip link keeps the paper-coloured edge around its ring, so the ring shows over black ink (ticket 16). */
+a.paper-chip:focus-visible {
+  box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
+    var(--paper);
+}
+
+/*
+ * Selected text: the page's own colours swapped (paper-coloured text on a dark highlight, 16.5:1) instead of the
+ * browser's tinted highlight, which the difference blend turned into low-contrast colours. Forced colours keep the
+ * system's Highlight colours.
+ */
+@media not (forced-colors: active) {
+  ::selection {
+    background-color: var(--text-colour);
+    color: var(--paper);
   }
 }
 

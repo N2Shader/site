@@ -24,3 +24,4 @@ Our own TSL code, modelled on watercolor.bizar.ro's design but with no copied sh
   - Follow-ups:
     - Taps don't leave a dot yet (from the planning answers). `BrushPointer` only reports moves.
     - The frame loop still never sleeps (07 finding, ticket 15).
+- 2026-11-16: Superseded by the ticket 17 follow-up. The brush no longer lays ink scaled by speed. Speed now thins the line, and the ink stays black. Wet ink also dries in about 4 s instead of about 8 s.

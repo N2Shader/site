@@ -56,9 +56,10 @@ const setSheetSize = (uniforms: InkUniforms, viewport: SceneViewport, grid: Simu
 
 const setFrame = (uniforms: InkUniforms, frameSeconds: number, dab: BrushDab | null) => {
   uniforms.frameSeconds.value = frameSeconds
-  uniforms.frictionKeep.value = Math.exp(-SceneSettings.flow.frictionPerSecond * frameSeconds)
-  uniforms.brushStrength.value = dab?.strength ?? 0
+  uniforms.frictionKeep.value = Math.exp(-SceneSettings.flow.frictionPerSecond * SceneSettings.ink.dryingSpeed * frameSeconds)
+  uniforms.brushActive.value = dab ? 1 : 0
   if (!dab) return
+  uniforms.brushWidth.value = dab.width
   uniforms.brushFrom.value.set(dab.from.x, dab.from.y)
   uniforms.brushTo.value.set(dab.to.x, dab.to.y)
   uniforms.brushVelocity.value.set(dab.velocity.x, dab.velocity.y).multiplyScalar(SceneSettings.brush.velocityShare)
