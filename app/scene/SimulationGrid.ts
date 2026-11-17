@@ -6,8 +6,8 @@ export type GridSize = { width: number, height: number }
 
 export type SimulationGrid = {
   /** Ink and water live here. */
-  paint: GridSize
-  /** The water flow runs here, at half the paint grid's resolution. */
+  ink: GridSize
+  /** The water flow runs here, at half the ink grid's resolution. */
   flow: GridSize
   /** Paper texture at the canvas's real pixel size, so its grain stays sharp. */
   paper: GridSize
@@ -24,18 +24,18 @@ const scaleGrid = (width: number, height: number, scale: number): GridSize => ({
 export const measureBrushRadius = ({ width, height }: Pick<SceneViewport, 'width' | 'height'>) =>
   Math.min(width, height) * SceneSettings.brush.radiusOfShortSide
 
-/** Sizes of the simulation's grids for a viewport. The low quality tier gets a coarser paint grid. */
+/** Sizes of the simulation's grids for a viewport. The low quality tier gets a coarser ink grid. */
 export const measureSimulationGrid = (
   viewport: SceneViewport,
-  { paintCellsPerPixel, maxPaintCells }: QualityTier,
+  { inkCellsPerPixel, maxInkCells }: QualityTier,
 ): SimulationGrid => {
   const { width, height, pixelRatio } = viewport
   const { flowScale } = SceneSettings.grid
-  const paintScale = Math.min(paintCellsPerPixel, maxPaintCells / Math.max(width, height, 1))
-  const paint = scaleGrid(width, height, paintScale)
+  const inkScale = Math.min(inkCellsPerPixel, maxInkCells / Math.max(width, height, 1))
+  const ink = scaleGrid(width, height, inkScale)
   return {
-    paint,
-    flow: scaleGrid(paint.width, paint.height, flowScale),
+    ink,
+    flow: scaleGrid(ink.width, ink.height, flowScale),
     paper: scaleGrid(width, height, pixelRatio),
     brushRadius: measureBrushRadius(viewport),
   }

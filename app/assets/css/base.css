@@ -74,8 +74,25 @@ a {
   }
 
   /*
-   * Selected text in the blend: the highlight is painted inside the blended element, so it's inverted too. White
-   * under black inverts to the same dark highlight and paper-coloured text as the unblended selection below.
+   * The company name while the content reveal is pending, in the blend: --paper-blended shows as the paper, like the
+   * unblended rule below. More specific than the blend rule above.
+   */
+  html[data-background-scene='running'][data-content-reveal='pending'] .content-layer [data-content-reveal-part='company-name'] {
+    color: var(--paper-blended);
+  }
+
+  /*
+   * A company-name letter or the description in the content reveal, in the blend: it fills from --paper-blended (shows
+   * as the paper) to the blended text colour. Same specificity as the blend rule above, so it must stay after it.
+   */
+  html[data-background-scene='running'] .content-layer :is(.content-reveal-letter, [data-content-reveal-part='description']) {
+    color: color-mix(in srgb, var(--text-colour-blended) calc(var(--reveal-fill) * 100%), var(--paper-blended));
+  }
+
+  /*
+   * Selected text in the blend: the highlight is painted inside the blended element, so it's inverted too. The
+   * blended text colour under #111 inverts on paper to a #111 highlight under light text, like the unblended
+   * selection below (tokens.css).
    */
   html[data-background-scene='running'] :is(.content-layer, .content-layer *):not(:has(a, .paper-chip), .paper-chip, .paper-chip *)::selection {
     background-color: var(--text-colour-blended);
@@ -91,14 +108,13 @@ a {
     mix-blend-mode: normal;
     color: var(--text-colour);
     background-color: var(--paper);
-    box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
-      var(--paper);
+    box-shadow: var(--focus-plate-shadow);
   }
 }
 
 /*
- * A paper-coloured chip with plain dark text (16.5:1) that never inverts over the ink: the locale switch and each
- * contact detail (owner's choice, ADR-0009). On bare paper it doesn't show; over the ink it's a small light box.
+ * A paper-coloured chip with plain dark text (16.9:1) that never inverts over the ink: the locale switch, each
+ * contact detail and the consent banner (owner's choice, ADR-0009). On bare paper it doesn't show; over the ink it's a small light box.
  * The chip must not hold a blended element: the blend inside it would only see the chip, not the ink.
  */
 .paper-chip {
@@ -110,12 +126,11 @@ a {
 
 /* A focused chip link keeps the paper-coloured edge around its ring, so the ring shows over black ink (ticket 16). */
 a.paper-chip:focus-visible {
-  box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
-    var(--paper);
+  box-shadow: var(--focus-plate-shadow);
 }
 
 /*
- * Selected text: the page's own colours swapped (paper-coloured text on a dark highlight, 16.5:1) instead of the
+ * Selected text: the page's own colours swapped (paper-coloured text on a dark highlight, 16.9:1) instead of the
  * browser's tinted highlight, which the difference blend turned into low-contrast colours. Forced colours keep the
  * system's Highlight colours.
  */
@@ -124,6 +139,66 @@ a.paper-chip:focus-visible {
     background-color: var(--text-colour);
     color: var(--paper);
   }
+}
+
+/*
+ * The content reveal's GSAP parts (the logo, the contact chips, the locale switch) stay hidden from the first paint
+ * until the reveal takes over (app/reveal/). The opacity only lasts while nothing shows, so it never cuts a blended
+ * element off from the ink (ADR-0009). Without JavaScript, or with reduced motion, the attribute is never set and the
+ * content shows at once.
+ */
+html[data-content-reveal='pending'] :is(
+  [data-content-reveal-part='logo'],
+  [data-content-reveal-part='contact-details'],
+  [data-content-reveal-part='locale-switch']
+) {
+  opacity: 0;
+}
+
+/*
+ * The company name is painted in the paper colour, not hidden, until its letters start to fill: the first paint
+ * already holds it, so it never waits for the reveal's JavaScript.
+ */
+html[data-content-reveal='pending'] [data-content-reveal-part='company-name'] {
+  color: var(--paper);
+}
+
+/*
+ * The description rises into place from the first paint, in CSS, so the largest text never waits for the reveal's
+ * JavaScript. It starts just after the company name would begin to fill. It fills from the paper colour like the
+ * company name's letters, never from transparent: Chrome only counts a paint for the largest contentful paint once
+ * the text has some opacity, so a fade from 0 would hold the measure back to the fade's end. Only the fill and a
+ * transform move, on the blended paragraph itself (it holds no link), and `backwards` drops both once it ends
+ * (ADR-0009). The head script (ContentRevealPendingScript.ts) sets the attribute, never under reduced motion, and
+ * drops it when this ends.
+ */
+@keyframes content-reveal-description-rise {
+  from {
+    --reveal-fill: 0;
+    transform: translateY(0.5em);
+  }
+}
+
+html[data-content-reveal-playing] [data-content-reveal-part='description'] {
+  /* power3.out, the ease the GSAP version used. */
+  animation: content-reveal-description-rise 0.9s cubic-bezier(0.215, 0.61, 0.355, 1) 0.15s backwards;
+}
+
+/*
+ * How far a part of the content reveal has filled from the paper colour to the text colour: 0 to 1, opaque
+ * throughout. Registered as a number, so the description's keyframes can interpolate it; at rest it's 1 (full text
+ * colour). ContentReveal.ts tweens it on each company-name letter.
+ */
+@property --reveal-fill {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+/* A company-name letter or the description, filling; the blended version is in the blend rules above. */
+.content-reveal-letter,
+[data-content-reveal-part='description'] {
+  color: color-mix(in srgb, var(--text-colour) calc(var(--reveal-fill) * 100%), var(--paper));
 }
 
 /*

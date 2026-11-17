@@ -1,6 +1,7 @@
 import type { Node } from 'three/webgpu'
-import { color, dot, floor, length, max, min, pow, screenUV, smoothstep, sqrt, vec2, vec4 } from 'three/tsl'
+import { color, dot, floor, fract, length, max, min, mix, pow, screenUV, smoothstep, sqrt, vec2, vec4 } from 'three/tsl'
 import { SceneSettings } from '../SceneSettings'
+import { fadeDeposit } from './InkPasses'
 import { hashCell } from './ShaderNoise'
 import type { InkUniforms } from './InkUniforms'
 
@@ -43,9 +44,26 @@ const shadePaper = (uniforms: InkUniforms, height: FloatNode, mottle: FloatNode)
 
 /** Gloss on wet ink, brightest where the water's surface tilts towards the light. */
 const wetSheen = (uniforms: InkUniforms, water: FloatNode) => {
-  const paintStep = uniforms.paintCell.div(uniforms.viewportSize)
-  const surfaceTilt = dot(slopeOf(uv => uniforms.state.sample(uv).x, paintStep), lightDirection).negate()
+  const inkCellStep = uniforms.inkCell.div(uniforms.viewportSize)
+  const surfaceTilt = dot(slopeOf(uv => uniforms.state.sample(uv).x, inkCellStep), lightDirection).negate()
   return smoothstep(0, 0.04, surfaceTilt).mul(smoothstep(0, 0.15, water)).mul(uniforms.settings.look.wetSheen)
+}
+
+/**
+ * Deposited ink after its fade, blended between the four nearest ink cells by hand. The canvas has more pixels than
+ * the ink grid, and the fade isn't linear in the stored deposit and age, so letting the texture filter blend those
+ * first would thin every stroke's grey edge (clean paper next to it holds the oldest age).
+ */
+const sampleFadedDeposit = (uniforms: InkUniforms) => {
+  const gridSize = uniforms.viewportSize.div(uniforms.inkCell)
+  const cellPosition = screenUV.mul(gridSize).sub(0.5)
+  const firstCell = floor(cellPosition)
+  const blend = fract(cellPosition)
+  const fadedCell = (dx: number, dy: number) => {
+    const cell = uniforms.state.sample(firstCell.add(vec2(dx, dy)).add(0.5).div(gridSize))
+    return fadeDeposit(uniforms, cell.z, cell.w)
+  }
+  return mix(mix(fadedCell(0, 0), fadedCell(1, 0), blend.x), mix(fadedCell(0, 1), fadedCell(1, 1), blend.x), blend.y)
 }
 
 /** Draw: the paper, the ink on it, a sheen on wet ink, a faint vignette and grain that doesn't move. */
@@ -54,7 +72,7 @@ export const createDrawNode = (uniforms: InkUniforms) => {
   const ink = uniforms.state.sample(screenUV)
   const paper = uniforms.paper.sample(screenUV)
   const granulation = paper.x.oneMinus().sub(0.5).mul(uniforms.settings.ink.granulation).add(1)
-  const density = max(ink.z.add(ink.y.mul(floatingInkWeight)), 0).mul(granulation)
+  const density = max(sampleFadedDeposit(uniforms).add(ink.y.mul(floatingInkWeight)), 0).mul(granulation)
   const inked = shadePaper(uniforms, paper.x, paper.z).mul(inkReflectance(uniforms, density)).add(wetSheen(uniforms, ink.x))
   const corner = smoothstep(0.3, 1, length(screenUV.sub(0.5)).mul(Math.SQRT2))
   const vignetted = inked.mul(corner.mul(vignette.negate()).add(1))

@@ -9,3 +9,7 @@ Visitors with `prefers-reduced-motion` get a still frame: clean paper, no ink, n
 ## Revisited for the ink scene
 
 Most of the risk is now gone. Ink only moves in response to the visitor's own pointer. The intro stroke lasts under five seconds. The sheet then dries, fades and the loop sleeps. The remaining motion is ink bleeding and fading after the visitor paints, which is motion caused by an interaction (2.3.3, AAA), and reduced-motion visitors don't get it. A pause control is still the fix if an audit disagrees.
+
+## The content reveal
+
+The content layer's entrance (GLOSSARY.md) plays once on load and lasts under two seconds, so 2.2.2 doesn't apply. Reduced-motion visitors skip it: the content shows at once.

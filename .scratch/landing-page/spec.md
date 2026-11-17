@@ -26,8 +26,7 @@ WCAG 2.2 AAA where feasible: 7:1 contrast against the fallback backdrop (over mi
 Lighthouse 100 ×4 on `/` and `/es` (mobile), axe zero violations plus a keyboard and screen-reader smoke test, Rich Results Test valid, hreflang and sitemap error-free (ADR-0006).
 
 ## Out of scope
-Contact form, analytics, cookie banner, CMS, extra pages, auth, backend, visible profile links.
+Contact form, CMS, extra pages, auth, backend, visible profile links.
 
 ## Open
 - Content-layer font: the owner supplies the files (ticket 06). Layout decided 2026-11-15: content stacked top-left, locale switch top-right. Colours follow the paper and the difference blend (ADR-0009).
-- Real copy, contact details and profile URLs in both languages.

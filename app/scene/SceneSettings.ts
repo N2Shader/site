@@ -13,7 +13,7 @@ export const SceneSettings = {
 
   /** Grids the simulation runs on. Sizes are relative to the viewport in CSS pixels. */
   grid: {
-    /** The water flow grid runs at half the paint grid's resolution. */
+    /** The water flow grid runs at half the ink grid's resolution. */
     flowScale: 0.5,
   },
 
@@ -27,18 +27,18 @@ export const SceneSettings = {
   },
   quality: {
     high: {
-      /** Paint grid cells per CSS pixel. */
-      paintCellsPerPixel: 1,
-      /** Longest side of the paint grid, so huge screens don't blow the fill budget. */
-      maxPaintCells: 1600,
+      /** Ink grid cells per CSS pixel. */
+      inkCellsPerPixel: 1,
+      /** Longest side of the ink grid, so huge screens don't blow the fill budget. */
+      maxInkCells: 1600,
       /** Jacobi pressure iterations per frame. */
       pressureIterations: 20,
       /** Sideways soak iterations per frame. */
       spreadIterations: 4,
     },
     low: {
-      paintCellsPerPixel: 0.5,
-      maxPaintCells: 800,
+      inkCellsPerPixel: 0.5,
+      maxInkCells: 800,
       pressureIterations: 10,
       spreadIterations: 2,
     },
@@ -52,15 +52,15 @@ export const SceneSettings = {
   maxFrameSeconds: 1 / 30,
 
   brush: {
-    /** Pen size: the brush radius at a slow stroke, as a share of the screen's short side (about 9% wide). */
-    radiusOfShortSide: 0.0457609,
+    /** Brush size: the brush radius at a slow stroke, as a share of the screen's short side (about 6% wide). */
+    radiusOfShortSide: 0.03,
     /** Speed, in short sides per second, at which the line is at its thinnest. */
     thinnestSpeed: 1.2,
-    /** Share of the pen size left at the thinnest speed. Fast strokes are thinner, never lighter. */
-    fastWidthShare: 0.117402,
+    /** Share of the brush size left at the thinnest speed. Fast strokes are thinner, never lighter. */
+    fastWidthShare: 0.05,
     /** Seconds the line's width takes to follow a change of speed (about two thirds of the way). */
     widthEaseSeconds: 0.08,
-    /** Outer share of the pen's radius that fades from black to grey. Inside it, the pen lays solid black. */
+    /** Outer share of the brush's radius that fades from black to grey. Inside it, the brush lays solid black. */
     softEdgeShare: 0.4,
     /** Below this speed, in short sides per second, the brush lays nothing. */
     restSpeed: 0.02,

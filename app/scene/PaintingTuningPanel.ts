@@ -45,7 +45,7 @@ type PlainControl = { label: string, groupName: PaintingSettingGroupName, key: s
  * neither slider clamps the other.
  */
 const plainControls: PlainControl[] = [
-  { label: 'Pen size', groupName: 'brush', key: 'radiusOfShortSide' },
+  { label: 'Brush size', groupName: 'brush', key: 'radiusOfShortSide' },
   { label: 'Width when fast', groupName: 'brush', key: 'fastWidthShare' },
   { label: 'Grey edge', groupName: 'brush', key: 'softEdgeShare' },
   { label: 'Drying speed', groupName: 'ink', key: 'dryingSpeed' },

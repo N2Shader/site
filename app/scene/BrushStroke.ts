@@ -8,7 +8,7 @@ export type BrushDab = {
   to: BrushPoint
   /** Brush velocity in CSS pixels per second. */
   velocity: BrushPoint
-  /** Share of the full pen size the line is drawn at, so fast strokes are thinner. The ink stays black at any width. */
+  /** Share of the full brush size the line is drawn at, so fast strokes are thinner. The ink stays black at any width. */
   width: number
   /** How much ink is left in the brush, 0–1. A low load leaves dry-brush gaps. */
   load: number
@@ -24,7 +24,7 @@ const drainForTravel = (travelled: number, speedShare: number) => {
   return travelled * drainPerShortSide * (slowDrainShare + (1 - slowDrainShare) * speedShare)
 }
 
-/** The width the pen thins to at `speedShare` of its thinnest speed: full at a crawl, `fastWidthShare` at speed. */
+/** The width the brush thins to at `speedShare` of its thinnest speed: full at a crawl, `fastWidthShare` at speed. */
 const measureWidthForSpeed = (speedShare: number) => 1 - (1 - SceneSettings.brush.fastWidthShare) * speedShare
 
 /** Moves `width` towards `targetWidth`, so the line thins and thickens smoothly instead of jumping each frame. */
@@ -94,8 +94,8 @@ export const createBrushStroke = (initialShortSide: number) => {
       pendingPoint = point
     },
     lift: endStroke,
-    /** A new sheet: the stroke ends and the brush is full again. */
-    resetForSheet: (nextShortSide: number) => {
+    /** Fresh paper: the stroke ends and the brush is full again. */
+    resetForFreshPaper: (nextShortSide: number) => {
       shortSide = nextShortSide
       endStroke()
       load = 1

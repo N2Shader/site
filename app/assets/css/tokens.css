@@ -5,22 +5,35 @@
    * dark-scheme stroke (public/favicon.svg) and the apple-touch-icon.png background.
    */
   --paper: #f4f2ee;
-  /* 16.5:1 against --paper, so every text size clears AAA's 7:1 (spec, Accessibility). */
-  --text-colour: #141414;
   /*
-   * Text colour while the content layer blends over the running background scene (ADR-0009).
-   * White under a difference blend shows as #0b0d11 on --paper (about 17:1) and as white on black ink.
+   * 16.9:1 against --paper, so every text size clears AAA's 7:1 (spec, Accessibility). Never pure black, on paper or
+   * over the ink (owner's choice, 2026-11-17).
    */
-  --text-colour-blended: #fff;
+  --text-colour: #111;
   /*
-   * Selected text (base.css): dark highlight under paper-coloured text, 16.5:1. Under the difference blend the
-   * highlight takes --text-colour-blended and the text this black, which show the same way on paper (#0b0d11 under
-   * #f4f2ee, about 17:1) and as black on white over black ink.
+   * Text colour while the content layer blends over the running background scene (ADR-0009): --paper minus
+   * --text-colour per channel, so under the difference blend it shows as exactly #111 on --paper, and as this light
+   * paper-like grey on black ink (16.1:1). Recompute it if either colour changes.
    */
-  --selection-text-colour-blended: #000;
+  --text-colour-blended: #e3e1dd;
+  /*
+   * Black under a difference blend leaves the backdrop unchanged, so blended text in this colour shows as the paper
+   * on paper (and as the ink on ink): the start of the company name's fill in the content reveal (base.css). It's
+   * the background showing through, never a text colour, so it stays pure black.
+   */
+  --paper-blended: #000;
+  /*
+   * Selected text (base.css): #111 highlight under paper-coloured text, 16.9:1. Under the difference blend the
+   * highlight takes --text-colour-blended and the text this #111, which show on paper as #e3e1dd text under a #111
+   * highlight (14.5:1) and over black ink as #111 under #e3e1dd, so no selected text is pure black.
+   */
+  --selection-text-colour-blended: #111;
 
   /*
    * Cascadia Mono (SIL OFL 1.1), one variable file covering weights 200–700: public/fonts/CascadiaMono-200-700.woff2.
+   * Subset to Latin (2026-11-17, 190 KiB to 26 KiB): U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-203A, U+20AC,
+   * U+2122, all layout features, the weight axis kept (fonttools `pyftsubset --flavor=woff2`). Copy that adds a
+   * character outside these ranges needs a new subset from the full file.
    * @nuxt/fonts finds it by name (it reads `--font-*` properties) and adds the @font-face and a metric-matched
    * monospace fallback, so the swap doesn't shift the layout. The mono version has no coding ligatures in the copy.
    * The owner keeps the full Cascadia 2111.01 set (Code/Mono, italics, Powerline, static weights; woff2/ttf/otf) at
@@ -39,7 +52,8 @@
   --type-body: clamp(0.875rem, 0.5rem + 0.9 * var(--fit-unit), 1.5rem);
   --type-display: clamp(1.75rem, 7 * var(--fit-unit), 6.5rem);
 
-  --logo-size: clamp(2rem, 9 * var(--fit-unit), 8rem);
+  /* Beside the company name, on its line: 96px on large screens, shrinking with the type scale. */
+  --logo-size: clamp(2rem, 6.5 * var(--fit-unit), 6rem);
 
   /* Distance from the screen edges; the locale switch (ticket 02) sits top-right on the same inset. */
   --space-edge: clamp(0.75rem, 3 * var(--fit-unit), 3.5rem);
@@ -49,7 +63,13 @@
   --focus-ring-offset: 3px;
   /*
    * Paper-coloured edge outside the focus ring over the running scene (base.css). The ring always sits on paper colour
-   * (16.5:1); the edge against the ink is what keeps the indicator visible: about 3.5:1 on mid-grey, more on black.
+   * (16.9:1); the edge against the ink is what keeps the indicator visible: about 3.5:1 on mid-grey, more on black.
    */
   --focus-ring-paper-edge: 2px;
+  /*
+   * The focused link's paper-coloured plate (base.css): fills the gap between text and ring and shows past the ring by
+   * the paper edge. The shadow paints under the outline.
+   */
+  --focus-plate-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + var(--focus-ring-paper-edge))
+    var(--paper);
 }

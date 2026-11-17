@@ -8,19 +8,24 @@ import { createSettingsUniforms } from './SettingsUniforms'
  *
  * Grid channels:
  * - paper: R height, G permeability, B mottle.
- * - state: R water, G floating ink, B deposited ink, A seconds since ink last settled here.
+ * - state: R water, G floating ink, B deposited ink before its fade, A seconds since ink last settled here (its age).
+ *   The fade is worked out from the age (`fadeDeposit`), not stored, so it doesn't round away in the half float.
  * - velocity: RG water velocity in CSS pixels per second.
  * - curl, divergence, pressure: R.
  */
 export const createInkUniforms = () => ({
   /** Viewport size in CSS pixels. */
   viewportSize: uniform(new Vector2(1, 1)),
-  /** Size in CSS pixels of one flow cell and one paint cell. */
+  /** Size in CSS pixels of one flow cell and one ink cell. */
   flowCell: uniform(new Vector2(2, 2)),
-  paintCell: uniform(new Vector2(1, 1)),
+  inkCell: uniform(new Vector2(1, 1)),
   /** Size of one paper texel in UV units, for its height gradient. */
   paperTexel: uniform(new Vector2(1, 1)),
   frameSeconds: uniform(1 / 60),
+  /** Seconds dried ink ages this frame, in whole age ticks (`InkAgeClock`), often 0 on fast screens. */
+  agingSeconds: uniform(0),
+  /** Oldest age a cell keeps (`measureInkAgeCapSeconds`), so the age stays exact in the half float. */
+  ageCapSeconds: uniform(31),
   /** Share of velocity kept this frame after friction. */
   frictionKeep: uniform(1),
 
@@ -28,9 +33,9 @@ export const createInkUniforms = () => ({
   brushFrom: uniform(new Vector2()),
   brushTo: uniform(new Vector2()),
   brushVelocity: uniform(new Vector2()),
-  /** The full pen size; the bristle noise is scaled by it, so the texture doesn't change as the line thins. */
+  /** The full brush size; the bristle noise is scaled by it, so the texture doesn't change as the line thins. */
   brushRadius: uniform(10),
-  /** Share of the pen size this frame's line is drawn at (thinner when fast). */
+  /** Share of the brush size this frame's line is drawn at (thinner when fast). */
   brushWidth: uniform(1),
   brushActive: uniform(0),
   brushLoad: uniform(1),

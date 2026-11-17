@@ -15,8 +15,8 @@ const fibresAt = (pixel: Vec2Node, angle: number) => {
 }
 
 /**
- * The paper, made once per sheet: R height (tooth, grain and fibres), G permeability (how easily water soaks through),
- * B mottle (large soft blotches in the sheet).
+ * The paper, made once per fresh paper (load and resize): R height (tooth, grain and fibres), G permeability (how easily water soaks through),
+ * B mottle (large soft blotches across the paper).
  */
 export const createPaperNode = (uniforms: InkUniforms) => {
   const pixel = fragmentPixel(uniforms)

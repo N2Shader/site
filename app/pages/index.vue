@@ -3,14 +3,18 @@
 const { t } = useI18n()
 useLandingPageMeta()
 useOrganizationSchema()
+// The parts the content reveal animates carry `data-content-reveal-part` (app/reveal/ContentReveal.ts).
+useContentReveal()
 </script>
 
 <template>
   <main class="landing-page content-layer">
-    <CompanyLogo />
-    <h1 class="landing-page__company-name">N2Shader</h1>
-    <p class="landing-page__description">{{ t('landingPage.description') }}</p>
-    <ContactDetailsList class="landing-page__contact-details" />
+    <div class="landing-page__masthead">
+      <CompanyLogo data-content-reveal-part="logo" />
+      <h1 class="landing-page__company-name" data-content-reveal-part="company-name">N2Shader</h1>
+    </div>
+    <p class="landing-page__description" data-content-reveal-part="description">{{ t('landingPage.description') }}</p>
+    <ContactDetailsList class="landing-page__contact-details" data-content-reveal-part="contact-details" />
   </main>
 </template>
 
@@ -28,6 +32,13 @@ useOrganizationSchema()
   padding: var(--space-edge);
 }
 
+/* The logo sits on the company name's line, to its left. */
+.landing-page__masthead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-stack);
+}
+
 .landing-page__company-name {
   margin: 0;
   font-size: var(--type-display);
@@ -39,8 +50,9 @@ useOrganizationSchema()
 .landing-page__description {
   margin: 0;
   /*
-   * Wide enough that the paragraph takes about four lines on a 568×320 landscape phone (an estimate, not yet seen in a
-   * browser; ticket 10), and under AAA's 80 characters per line (1.4.8).
+   * Wide enough that the paragraph takes four lines (en) or three (es) on a 568×320 landscape phone, so the whole
+   * stack is about 240px tall there now the logo sits beside the company name (worked out from the tokens, not yet seen
+   * in a browser), and under AAA's 80 characters per line (1.4.8).
    */
   max-inline-size: 60ch;
   font-size: var(--type-body);

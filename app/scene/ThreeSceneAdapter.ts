@@ -56,7 +56,7 @@ export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneV
   const renderer = await createRenderer(canvas)
   sizeCanvas(renderer, viewport)
   let qualityTier = readQualityTier(window)
-  let sheetViewport = viewport
+  let paperViewport = viewport
   const simulation = createInkSimulation(renderer, viewport, measureSimulationGrid(viewport, qualityTier), qualityTier)
   const brush = createBrushStroke(shortSideOf(viewport))
   const paperClock = createCleanPaperClock()
@@ -74,10 +74,10 @@ export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneV
   }
 
   const resize = (nextViewport: SceneViewport) => {
-    sheetViewport = nextViewport
+    paperViewport = nextViewport
     sizeCanvas(renderer, nextViewport)
-    simulation.startSheet(nextViewport, measureSimulationGrid(nextViewport, qualityTier), qualityTier)
-    brush.resetForSheet(shortSideOf(nextViewport))
+    simulation.startFreshPaper(nextViewport, measureSimulationGrid(nextViewport, qualityTier), qualityTier)
+    brush.resetForFreshPaper(shortSideOf(nextViewport))
     paperClock.markPaperClean()
   }
 
@@ -89,7 +89,7 @@ export const loadThreeScene = async (canvas: HTMLCanvasElement, viewport: SceneV
 
   const useQualityTier = (choice: QualityTierChoice) => {
     qualityTier = readQualityTierForChoice(window, choice)
-    resize(sheetViewport)
+    resize(paperViewport)
   }
 
   const startLoop = (onPaperClean: () => void) => {

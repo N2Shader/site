@@ -1,5 +1,6 @@
 import type { RenderTarget, WebGPURenderer } from 'three/webgpu'
 import type { BrushDab } from '../BrushStroke'
+import { createInkAgeClock, measureInkAgeCapSeconds } from '../InkAgeClock'
 import type { QualityTier } from '../QualityTier'
 import { SceneSettings } from '../SceneSettings'
 import type { SceneViewport } from '../SceneViewport'
@@ -15,19 +16,19 @@ import type { InkUniforms } from './InkUniforms'
 import { createPaperNode } from './PaperPass'
 import { syncSettingsUniforms } from './SettingsUniforms'
 
-/** Every grid for one sheet of paper. A new sheet (on resize) gets new grids at the new size. */
-const createSheetTargets = (grid: SimulationGrid) => ({
+/** Every grid for one paper. Fresh paper (on resize) gets new grids at the new size. */
+const createPaperTargets = (grid: SimulationGrid) => ({
   paper: createGridTarget(grid.paper),
-  state: createPingPongTarget(grid.paint),
+  state: createPingPongTarget(grid.ink),
   velocity: createPingPongTarget(grid.flow),
   pressure: createPingPongTarget(grid.flow),
   curl: createGridTarget(grid.flow),
   divergence: createGridTarget(grid.flow),
 })
 
-type SheetTargets = ReturnType<typeof createSheetTargets>
+type PaperTargets = ReturnType<typeof createPaperTargets>
 
-const disposeSheetTargets = (targets: SheetTargets) => {
+const disposePaperTargets = (targets: PaperTargets) => {
   targets.paper.dispose()
   targets.state.dispose()
   targets.velocity.dispose()
@@ -37,7 +38,7 @@ const disposeSheetTargets = (targets: SheetTargets) => {
 }
 
 /** Points every shader's grid inputs at the grids to read from this pass. */
-const bindReadTargets = (uniforms: InkUniforms, targets: SheetTargets) => {
+const bindReadTargets = (uniforms: InkUniforms, targets: PaperTargets) => {
   uniforms.paper.value = targets.paper.texture
   uniforms.state.value = targets.state.read.texture
   uniforms.velocity.value = targets.velocity.read.texture
@@ -46,10 +47,10 @@ const bindReadTargets = (uniforms: InkUniforms, targets: SheetTargets) => {
   uniforms.divergence.value = targets.divergence.texture
 }
 
-const setSheetSize = (uniforms: InkUniforms, viewport: SceneViewport, grid: SimulationGrid) => {
+const setPaperSize = (uniforms: InkUniforms, viewport: SceneViewport, grid: SimulationGrid) => {
   uniforms.viewportSize.value.set(viewport.width, viewport.height)
   uniforms.flowCell.value.set(viewport.width / grid.flow.width, viewport.height / grid.flow.height)
-  uniforms.paintCell.value.set(viewport.width / grid.paint.width, viewport.height / grid.paint.height)
+  uniforms.inkCell.value.set(viewport.width / grid.ink.width, viewport.height / grid.ink.height)
   uniforms.paperTexel.value.set(1 / grid.paper.width, 1 / grid.paper.height)
   uniforms.brushRadius.value = grid.brushRadius
 }
@@ -91,10 +92,11 @@ export const createInkSimulation = (
   qualityTier: QualityTier,
 ) => {
   const uniforms = createInkUniforms()
+  const ageClock = createInkAgeClock()
   const passes = createSimulationPasses(uniforms)
-  let targets = createSheetTargets(grid)
-  let sheetViewport = viewport
-  let sheetTier = qualityTier
+  let targets = createPaperTargets(grid)
+  let paperViewport = viewport
+  let paperTier = qualityTier
 
   const renderPass = (pass: FullScreenPass, target: RenderTarget | null) => {
     bindReadTargets(uniforms, targets)
@@ -123,55 +125,57 @@ export const createInkSimulation = (
   }
 
   /** Makes the paper for the current grids and clears them of ink. */
-  const prepareSheet = (nextViewport: SceneViewport, nextGrid: SimulationGrid) => {
-    sheetViewport = nextViewport
-    setSheetSize(uniforms, nextViewport, nextGrid)
+  const preparePaper = (nextViewport: SceneViewport, nextGrid: SimulationGrid) => {
+    paperViewport = nextViewport
+    setPaperSize(uniforms, nextViewport, nextGrid)
     clearInk()
     renderPass(passes.paper, targets.paper)
   }
 
-  /** A fresh sheet: new paper at the grid's size, with no ink on it, run at `nextTier`'s iterations. */
-  const startSheet = (nextViewport: SceneViewport, nextGrid: SimulationGrid, nextTier: QualityTier) => {
-    disposeSheetTargets(targets)
-    targets = createSheetTargets(nextGrid)
-    sheetTier = nextTier
-    prepareSheet(nextViewport, nextGrid)
+  /** Fresh paper: new paper at the grid's size, with no ink on it, run at `nextTier`'s iterations. */
+  const startFreshPaper = (nextViewport: SceneViewport, nextGrid: SimulationGrid, nextTier: QualityTier) => {
+    disposePaperTargets(targets)
+    targets = createPaperTargets(nextGrid)
+    paperTier = nextTier
+    preparePaper(nextViewport, nextGrid)
   }
 
-  /** Picks up retuned `SceneSettings` (the dev tuning panel) in the running shaders, keeping the ink on the sheet. */
+  /** Picks up retuned `SceneSettings` (the dev tuning panel) in the running shaders, keeping the ink on the paper. */
   const applyTunedSettings = () => {
     syncSettingsUniforms(uniforms.settings)
-    uniforms.brushRadius.value = measureBrushRadius(sheetViewport)
+    uniforms.brushRadius.value = measureBrushRadius(paperViewport)
   }
 
   const flowWater = () => {
     renderPass(passes.curl, targets.curl)
     renderPingPong(passes.advectVelocity, targets.velocity)
     renderPass(passes.divergence, targets.divergence)
-    renderPingPong(passes.pressure, targets.pressure, sheetTier.pressureIterations)
+    renderPingPong(passes.pressure, targets.pressure, paperTier.pressureIterations)
     renderPingPong(passes.project, targets.velocity)
   }
 
   /** Advances the simulation by one frame, with what the brush laid in it. */
   const step = (frameSeconds: number, dab: BrushDab | null) => {
     setFrame(uniforms, frameSeconds, dab)
+    uniforms.agingSeconds.value = ageClock.advanceFrame(frameSeconds)
+    uniforms.ageCapSeconds.value = measureInkAgeCapSeconds()
     flowWater()
     renderPingPong(passes.carry, targets.state)
-    renderPingPong(passes.spread, targets.state, sheetTier.spreadIterations)
+    renderPingPong(passes.spread, targets.state, paperTier.spreadIterations)
     renderPingPong(passes.settle, targets.state)
   }
 
-  prepareSheet(viewport, grid)
+  preparePaper(viewport, grid)
 
   return {
-    startSheet,
+    startFreshPaper,
     clearInk,
     applyTunedSettings,
     step,
     /** Draws the paper and its ink onto the canvas. */
     draw: () => renderPass(passes.draw, null),
     dispose: () => {
-      disposeSheetTargets(targets)
+      disposePaperTargets(targets)
       Object.values(passes).forEach(pass => pass.dispose())
     },
   }

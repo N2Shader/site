@@ -8,6 +8,7 @@
     "alt": "N2Shader logo and name, with the slogan: @:landingPage.slogan"
   },
   "localeSwitch": {
+    "navigationLabel": "Language",
     "hintInOtherLocale": "cambiar el idioma de la página"
   },
   "contactDetails": {
@@ -19,5 +20,13 @@
       "region": "West Yorkshire",
       "country": "England"
     }
+  },
+  "analyticsConsent": {
+    "regionLabel": "Cookie consent",
+    "question": "Can we use Google Analytics cookies to count visits? No analytics cookies are set unless you accept.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "reopen": "Cookies",
+    "reopenHint": "change your analytics choice"
   }
 }

@@ -25,12 +25,14 @@
   force = true
 
 # Security headers on every response. Nuxt inlines a per-build config script and the component
-# styles, and the page has no user input or third-party code, so 'unsafe-inline' is the chosen
-# trade-off (ticket 09). The JSON-LD is never run as script, so script-src doesn't block it.
+# styles, and the page has no user input, so 'unsafe-inline' is the chosen trade-off (ticket 09).
+# The JSON-LD is never run as script, so script-src doesn't block it. The one third-party code is
+# the owner's Google Tag Manager container (Google Analytics, ADR-0006): script-src, img-src and
+# connect-src allow Google's tag and analytics hosts, per Google's GA4 CSP guidance.
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"

@@ -18,7 +18,7 @@ const measureBrushLine = (uniforms: InkUniforms, pixel: Vec2Node) => {
   }
 }
 
-/** This frame's line radius in CSS pixels: the pen size, thinned by speed. */
+/** This frame's line radius in CSS pixels: the brush size, thinned by speed. */
 const measureLineRadius = (uniforms: InkUniforms) => uniforms.brushRadius.mul(uniforms.brushWidth)
 
 /** Soft round reach of the brush, for pushing the water along its path. */
@@ -31,7 +31,7 @@ export const brushPushFalloff = (uniforms: InkUniforms, pixel: Vec2Node) => {
 /**
  * Share of this cell the brush covers this frame: a solid core, a soft edge that fades to grey, ragged edges,
  * bristles that splay sideways, and dry-brush gaps that open up between the bristles as the load runs low. The noise
- * is scaled by the full pen size, so the bristle texture stays the same as the line thins.
+ * is scaled by the full brush size, so the bristle texture stays the same as the line thins.
  */
 export const brushCoverage = (uniforms: InkUniforms, pixel: Vec2Node) => {
   const { raggedness, splay, dryLoad, softEdgeShare } = uniforms.settings.brush

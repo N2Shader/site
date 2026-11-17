@@ -177,3 +177,50 @@
 ## Tuned painting values — 2026-11-16 22:00
 
 1. New SceneSettings values from the panel snippet (pen size 0.0457609, width when fast 0.117402, drying speed 2.01685)
+
+## Next ticket — 2026-11-16 22:10
+
+1. what ticket should be the next
+
+## Build ticket 18: dried ink fades on high-refresh screens — 2026-11-17 09:00
+
+1. /build-ticket 18
+2. (input answer) test seams: no tests
+
+## Build ticket 10: real copy, last checks and the fit check — 2026-11-17 10:30
+
+1. /build-ticket 10
+
+## Tuned painting values (2) — 2026-11-17
+
+1. Update values from the panel snippet (pen size 0.03, width when fast 0.05)
+
+## Build ticket 11: definition-of-done check — 2026-11-17 07:47
+
+1. /build-ticket 11
+2. (input answers) allow build + Chrome now for Lighthouse/axe; add an axe e2e test; owner runs Rich Results Test after deploy; /audit-all report only
+3. (input answer) Lighthouse accessibility 96 (axe misreads the difference blend): accept it, record why, confirm 100 in the fallback state
+4. (input answer) the analytics session changed the tree mid-measurement: close ticket 11 on the current results, note the banner state is unchecked, run /audit-all now
+
+## Google Analytics via Tag Manager, GDPR options — 2026-11-17 12:00
+
+1. This is my script for google analitics, add it to the page please: (GTM-PFX7ZQ43 gtm.js + dataLayer/gtag snippet)
+2. Questions: is the copied GA/Tag Manager script incomplete? GA without a banner under GDPR for a very small company? Recommendation, and could this move to an in-house pnpm package?
+3. (input answers) GA + consent banner, at the bottom of the site, small and subtle; no in-house package
+
+## Logo beside the name and the content reveal — 2026-11-17 13:00
+
+1. Logo on the same line, left of the title, about 96px; a smooth subtle intro animation for the texts: GSAP SplitText fade or colour fill per char for the title, DrawSVG for the logo, the long text starting just after the title begins (staggered, not after it ends), be creative with the rest
+2. The title animation happens too fast; reduce the duration a little (slowed it down)
+3. Is the title fading? Make the title the same colour as the background (not transparent), then colour it to black
+4. Avoid pure black on texts, even on the ink; use #111
+
+## Audit follow-ups: banner entry, reveal LCP, eases, shared CSS and the top issues — 2026-11-17 10:01
+
+1. Fix: (1) consent banner 200ms fade-up on entry; (2) the reveal holding back the largest text (CSS motion for the description or first visit only); (3) chip wipes power2.out; (4) the repeated focus-plate shadow and banner button CSS; plus the top issues list (unmeasured reveal/banner, 190 KiB font, focus on hidden links during the reveal, consent text, banner covering focus, 44px contact links, glossary naming drift)
+2. (input answers) reveal: CSS start for the name (paper-coloured) and the description (one-block CSS rise), GSAP keeps logo, letters, chips; subset the font to Latin; consent copy "No analytics cookies are set unless you accept"; keep the 22px contact links (accept AA, record it); banner covering focus: accept and record; rebuild + Lighthouse + keyboard check at the end
+3. continue
+
+## Verify the uncommitted changes — 2026-11-17 19:21
+
+1. /verify

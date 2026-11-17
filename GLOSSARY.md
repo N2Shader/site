@@ -20,9 +20,17 @@ _Avoid_: Canvas, hero, background animation
 The static image or gradient shown behind the content layer before the background scene appears, or instead of it when it can't run.
 _Avoid_: Placeholder, poster, loading screen
 
+**Consent banner**:
+The small box at the bottom right that asks the visitor to accept or reject Google Analytics cookies. Once they choose, it shrinks to a "Cookies" button that reopens it. Not part of the content layer.
+_Avoid_: Cookie popup, cookie notice, GDPR banner
+
 **Still frame**:
 The background scene as clean paper with no ink, shown to visitors who ask their device for reduced motion.
 _Avoid_: Paused scene, static mode
+
+**Content reveal**:
+The content layer's one-time entrance when the page first loads: the logo draws its strokes, the company name fills in letter by letter from the paper colour to the text colour, the description rises in just after, then the contact chips and the locale switch wipe open. Skipped for reduced motion.
+_Avoid_: Intro animation, text intro, page transition (and not the intro stroke, which is the background scene's)
 
 ## Background scene
 

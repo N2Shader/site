@@ -1,3 +1,4 @@
+import { measureFadedInkAgeSeconds, measureInkAgeTickSeconds } from './InkAgeClock'
 import { SceneSettings } from './SceneSettings'
 
 /**
@@ -15,12 +16,11 @@ const measureDryingSeconds = () => {
 
 /**
  * Simulated seconds after the brush last laid ink until the paper is clean again: the ink dries, holds, and fades
- * fully (the fade takes `maxDeposit` away over `fadeSeconds`, so the darkest cell is gone by then).
+ * fully (the fade takes `maxDeposit` away over `fadeSeconds`, so the darkest cell is gone by then). The ink's age grows
+ * in whole age ticks, so it can trail the simulated seconds by up to one tick.
  */
-const measureSecondsUntilClean = () => {
-  const { holdSeconds, fadeSeconds } = SceneSettings.ink
-  return measureDryingSeconds() + holdSeconds + fadeSeconds + SceneSettings.cleanPaperMarginSeconds
-}
+const measureSecondsUntilClean = () =>
+  measureDryingSeconds() + measureFadedInkAgeSeconds() + measureInkAgeTickSeconds() + SceneSettings.cleanPaperMarginSeconds
 
 /**
  * Says when the paper is clean (no wet ink, all dried ink faded) without reading the GPU back. It counts the same
