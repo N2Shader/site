@@ -135,7 +135,8 @@ describe.each([
   })
 })
 
-describe.each([
+// Skipped while the locale switch is hidden (commented out in app.vue, 2026-11-20); drop `.skip` when it comes back.
+describe.skip.each([
   {
     route: '/',
     otherLocale: { href: '/es', lang: 'es-ES', code: 'ES', accessibleName: 'ES, Español: cambiar el idioma de la página' },

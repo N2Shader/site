@@ -30,7 +30,17 @@
   --selection-text-colour-blended: #111;
 
   /*
-   * Cascadia Mono (SIL OFL 1.1), one variable file covering weights 200–700: public/fonts/CascadiaMono-200-700.woff2.
+   * Trying Sentient (2026-11-20): two static files, public/fonts/Sentient-Regular.woff2 (400) and Sentient-Bold.woff2
+   * (700, the company name), copied from the owner's Portfolio project. @nuxt/fonts reads the weights from the file
+   * names. Subset to Latin like Cascadia (2026-11-20, 24/23 KiB to 16/15 KiB): the same ranges, all layout features
+   * (`pyftsubset --flavor=woff2`). The full files are in the Portfolio project (code/public/fonts); copy that adds a
+   * character outside the ranges needs a new subset from them. To go back, restore the deleted Cascadia file from git
+   * (`git checkout 2d8aebe -- public/fonts/CascadiaMono-200-700.woff2`) and swap --font-body for the Cascadia line below.
+   */
+  --font-body: 'Sentient', Georgia, 'Times New Roman', serif;
+
+  /*
+   * Previous font. Cascadia Mono (SIL OFL 1.1), one variable file covering weights 200–700: public/fonts/CascadiaMono-200-700.woff2.
    * Subset to Latin (2026-11-17, 190 KiB to 26 KiB): U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-203A, U+20AC,
    * U+2122, all layout features, the weight axis kept (fonttools `pyftsubset --flavor=woff2`). Copy that adds a
    * character outside these ranges needs a new subset from the full file.
@@ -39,7 +49,7 @@
    * The owner keeps the full Cascadia 2111.01 set (Code/Mono, italics, Powerline, static weights; woff2/ttf/otf) at
    * C:\Users\Jaime\Code\UTILS\CascadiaCode-2111.01. Copy in only the file a new style needs, never the whole set.
    */
-  --font-body: 'Cascadia Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* --font-body: 'Cascadia Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; */
 
   /*
    * The page never scrolls, it shrinks to fit (ADR-0004). Sizes grow with the viewport width, except on

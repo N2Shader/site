@@ -224,3 +224,9 @@
 ## Verify the uncommitted changes — 2026-11-17 19:21
 
 1. /verify
+
+## Hide the locale switch, try the Sentient font — 2026-11-20 21:26
+
+1. Hide the language switch button (comment it, we can use it later); replace the current font with Sentient (Sentient-Bold.woff2, Sentient-Regular.woff2 from the Portfolio project) to see how it looks
+2. Trim (subset) the Sentient fonts
+3. I deleted the old Cascadia font, does that break anything?
